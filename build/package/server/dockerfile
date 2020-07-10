@@ -1,0 +1,78 @@
+
+#
+# ------------------- BUILD GOLANG ---------------------------
+#
+FROM golang:latest as build-go
+
+LABEL maintainer="Patrick van der Velde <petrikvandervelde@gmail.com"
+
+ARG NOW
+ARG REVISION
+ARG VERSION
+
+WORKDIR /app
+
+COPY go.mod .
+COPY configs/ ./configs
+COPY internal/ ./internal
+COPY cmd/server ./cmd/server
+
+RUN go mod download
+
+RUN CGO_ENABLED=0\
+  GOOS=linux\
+  go build\
+  -a\
+  -installsuffix cgo\
+  -v\
+  -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=${REVISION} -X github.com/calvinverse/service.provisioning/internal/info.buildTime=${NOW} -X github.com/calvinverse/service.provisioning/internal/info.version=${VERSION}"\
+  -o main\
+  ./cmd
+
+#
+# ------------------- BUILD NPM ------------------------------
+#
+
+FROM node:alpine AS build-node
+
+RUN apk --no-cache add python2
+
+# This is required due to this issue: https://github.com/nodejs/node-gyp/issues/1236#issuecomment-309401410
+RUN mkdir /root/.npm-global && npm config set prefix '/root/.npm-global'
+
+ENV PATH="/root/.npm-global/bin:${PATH}"
+ENV NPM_CONFIG_LOGLEVEL warn
+ENV NPM_CONFIG_PREFIX=/root/.npm-global
+
+RUN npm install -g npm@latest
+
+# deps
+RUN mkdir -p /src/ui
+
+ADD ./ui/package.json /src/ui/
+
+RUN cd /src/ui && npm install
+
+# build
+ADD ./ui /src/ui
+RUN cd /src/ui && ng build --prod --aot
+
+#
+# ------------------- ASSEMBLE --------------------------------
+#
+
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY --from=build-go /app/main .
+
+COPY --from=build-go /configs .
+
+COPY --from=build-node /src/ui/dist ./client
+
+EXPOSE 8080
+
+CMD ["./main"]
