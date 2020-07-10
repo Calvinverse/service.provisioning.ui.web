@@ -16,7 +16,7 @@ var (
 	cfgFile string
 
 	rootCmd = &cobra.Command{
-		Use: "NAME OF THING",
+		Use: "service.provisioning",
 	}
 )
 
@@ -42,7 +42,7 @@ func initializeLogger() {
 }
 
 func main() {
-	if err := rootCmd.Execute(); err != nill {
+	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
 }

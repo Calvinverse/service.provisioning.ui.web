@@ -1,11 +1,12 @@
 package config
 
-import {
+import (
 	"strings"
 
 	"github.com/spf13/viper"
-}
+)
 
+// LoadConfig loads the configuration for the application from different configuration sources
 func LoadConfig() {
 
 	// From the environment

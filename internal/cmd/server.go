@@ -35,19 +35,19 @@ func routes() *chi.Mux {
 	// Based on this post and the comments: https://www.troyhunt.com/your-api-versioning-is-wrong-which-is/
 	// Use the api/v1 approach
 	//
-	router.Route("api/v1", func(r chi.Router) {
+	router.Route("/api/v1", func(r chi.Router) {
 		r.Mount("/self", health.Routes())
 	})
 
 	web.Routes(router)
 
-	return Router
+	return router
 }
 
 // ServerCmd is the server command
 var ServerCmd = &cobra.Command{
-	Use:   "Server",
+	Use:   "server",
 	Short: "Runs the application as a server",
-	Long:  "Runs the XXX application in server mode",
+	Long:  "Runs the service.provisioning application in server mode",
 	Run:   executeServer,
 }
