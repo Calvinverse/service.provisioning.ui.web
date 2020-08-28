@@ -47,15 +47,22 @@ ENV NPM_CONFIG_PREFIX=/root/.npm-global
 RUN npm install -g npm@latest
 
 # deps
-RUN mkdir -p /src/ui
+RUN mkdir -p /web
 
-ADD ./ui/package.json /src/ui/
+COPY ./ui/babel.config.js /web
+COPY ./ui/package.json /web
+COPY ./ui/package-lock.json /web
+COPY ./ui/tsconfig.json /web
+COPY ./ui/vue.config.js /web
 
-RUN cd /src/ui && npm install
+COPY ./ui/public /web/public
+COPY ./ui/src /web/src
+COPY ./ui/tests /web/tests
+
+RUN cd /web && npm install
 
 # build
-ADD ./ui /src/ui
-RUN cd /src/ui && ng build --prod --aot
+RUN cd /src/ui && npm run lint && npm run build && npm run test:unit && npm run test:e2e
 
 #
 # ------------------- ASSEMBLE --------------------------------
@@ -71,7 +78,9 @@ COPY --from=build-go /app/main .
 
 COPY --from=build-go /configs .
 
-COPY --from=build-node /src/ui/dist ./client
+RUN mkdir -p ./client
+
+COPY --from=build-node /web/dist ./client
 
 EXPOSE 8080
 
