@@ -34,6 +34,55 @@ function Get-Version
     return & $gitVersion /output json /showvariable SemVer
 }
 
+function Invoke-Npm
+{
+    [CmdletBinding()]
+    param (
+        [string] $clientDirectory
+    )
+
+    $currentDirectory = $pwd
+    try
+    {
+        Set-Location (Join-Path $PSScriptRoot 'web')
+
+        npm run lint
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "NPM run lint failed with exit code: $LASTEXITCODE"
+        }
+
+        npm run build
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "NPM run build failed with exit code: $LASTEXITCODE"
+        }
+
+        npm run test:unit
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "NPM run test:unit failed with exit code: $LASTEXITCODE"
+        }
+
+        npm run test:e2e
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "NPM run test:e2e failed with exit code: $LASTEXITCODE"
+        }
+    }
+    finally
+    {
+        Set-Location $currentDirectory
+    }
+
+    if (-not (Test-Path $clientDirectory))
+    {
+        New-Item -Path $clientDirectory -ItemType Directory | Out-Null
+    }
+
+    Get-ChildItem -Path (Join-Path $PSScriptRoot 'web' 'dist')  | Copy-Item -Destination $clientDirectory -Recurse -Container
+}
+
 function New-Container
 {
     [CmdletBinding()]
@@ -61,6 +110,8 @@ function New-LocalBuild
     {
         New-Item -Path $absoluteOutputDir -ItemType Directory | Out-Null
     }
+
+    Invoke-Npm
 
     Copy-Item -Path (Join-Path $PSScriptRoot "configs" "*") -Destination $absoluteOutputDir -Force
     go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning/internal/info.version=$version" -o $outputDir/server.exe ./cmd
