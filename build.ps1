@@ -92,6 +92,12 @@ function New-Container
         [string] $date
     )
 
+    Write-Output "Building Docker container with build arguments:"
+    Write-Output "NOW = $date"
+    Write-Output "REVISION = $sha1"
+    Write-Output "VERSION = $version"
+    Write-Output "Tagging with: service-provisioning:$version"
+
     docker build --force-rm --build-arg NOW=$date --build-arg REVISION=$sha1 --build-arg VERSION=$version --file ./build/package/server/dockerfile --tag service-provisioning:$version .
 }
 
