@@ -15,7 +15,7 @@ WORKDIR /app
 COPY go.mod .
 COPY configs/ ./configs
 COPY internal/ ./internal
-COPY cmd/server ./cmd/server
+COPY cmd/ ./cmd
 
 RUN go mod download
 
@@ -26,7 +26,7 @@ RUN CGO_ENABLED=0\
   -installsuffix cgo\
   -v\
   -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=${REVISION} -X github.com/calvinverse/service.provisioning/internal/info.buildTime=${NOW} -X github.com/calvinverse/service.provisioning/internal/info.version=${VERSION}"\
-  -o main\
+  -o service.provisioning\
   ./cmd
 
 #
@@ -49,39 +49,48 @@ RUN npm install -g npm@latest
 # deps
 RUN mkdir -p /web
 
-COPY ./ui/babel.config.js /web
-COPY ./ui/package.json /web
-COPY ./ui/package-lock.json /web
-COPY ./ui/tsconfig.json /web
-COPY ./ui/vue.config.js /web
+COPY ./web/babel.config.js /web
+COPY ./web/package.json /web
+COPY ./web/package-lock.json /web
+COPY ./web/tsconfig.json /web
+COPY ./web/vue.config.js /web
 
-COPY ./ui/public /web/public
-COPY ./ui/src /web/src
-COPY ./ui/tests /web/tests
+COPY ./web/public /web/public
+COPY ./web/src /web/src
+COPY ./web/tests /web/tests
 
 RUN cd /web && npm install
 
 # build
-RUN cd /src/ui && npm run lint && npm run build && npm run test:unit && npm run test:e2e
+RUN cd /web && npm run lint && npm run build
+# && npm run test:unit && npm run test:e2e
 
 #
 # ------------------- ASSEMBLE --------------------------------
 #
 
-FROM alpine:latest
+# Should grab our base container
+FROM testcalvinverse.azurecr.io/base.container.linux:latest
 
-RUN apk --no-cache add ca-certificates
+# Create a user and group first so the IDs get set the same way, even as
+# the rest of this may change over time.
+RUN addgroup provisioning && adduser provisioning --system --ingroup provisioning
 
-WORKDIR /root/
+RUN mkdir -p /etc/service.provisioning && \
+  chown -R provisioning:provisioning /etc/service.provisioning && \
+  mkdir -p /etc/service/service.provisioning
 
-COPY --from=build-go /app/main .
+COPY --from=build-go /app/service.provisioning /usr/bin
 
-COPY --from=build-go /configs .
+COPY --from=build-go /configs/config.yaml /etc/service.provisioning
 
-RUN mkdir -p ./client
+COPY --from=build-node /web/dist/ /etc/service.provisioning/client
 
-COPY --from=build-node /web/dist ./client
+COPY ./build/package/server/service.provisioning.sh /etc/service/service.provisioning/run
+
+RUN ls -la /etc/service.provisioning
+
+RUN dos2unix /etc/service/service.provisioning/run && \
+  chmod +x /etc/service/service.provisioning/run
 
 EXPOSE 8080
-
-CMD ["./main"]
