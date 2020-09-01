@@ -1,37 +1,34 @@
 package web
 
 import (
-	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/calvinverse/service.provisioning/internal/router"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 
-	"github.com/calvinverse/service.provisioning/internal/router"
+	"github.com/spf13/viper"
 )
 
-var index []byte
-
+// Routes exports the web routes
 func Routes(r *chi.Mux) {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-
-	workDir := filepath.Dir(ex)
+	workDir := viper.GetString("config.ui.path")
 	filesDir := filepath.Join(workDir, "client")
 
 	// Load the index.html
-	index, _ = ioutil.ReadFile(filesDir + "/index.html")
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filesDir+"/index.html")
+	})
 
 	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filesDir+"/favicon.ico")
 	})
 
-	fileServer(r, "/client", http.Dir(filesDir))
+	fileServer(r, "/css", http.Dir(filesDir+"/css"))
+	fileServer(r, "/img", http.Dir(filesDir+"/img"))
+	fileServer(r, "/js", http.Dir(filesDir+"/js"))
 
 	r.Mount("/", rootRouter())
 }
@@ -60,10 +57,6 @@ func rootRouter() chi.Router {
 	r := router.NewChiRouter()
 
 	r.Use(middleware.NoCache)
-
-	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(index)
-	})
 
 	return r
 }
