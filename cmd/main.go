@@ -26,11 +26,17 @@ func init() {
 	log.WithFields(log.Fields{
 		"path": "unknown",
 	}).Info("loading configuration")
-	cobra.OnInitialize(config.LoadConfig)
+	cobra.OnInitialize(initializeConfiguration)
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 
 	rootCmd.AddCommand(cmd.ServerCmd)
 
 	rootCmd.Version = info.Version()
+}
+
+func initializeConfiguration() {
+	config.LoadConfig(cfgFile)
 }
 
 func initializeLogger() {
