@@ -2,6 +2,7 @@ package config
 
 import (
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -25,8 +26,6 @@ func LoadConfig(cfgFile string) {
 
 	// Only use consul if we have a host+port and consul key specified
 
-
-
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
@@ -37,7 +36,7 @@ func loadFromConsul() {
 	viper.AddRemoteProvider("consul", "localhost:8500", "MY_CONSUL_KEY")
 	viper.SetConfigType("yaml")
 
-	go func(){
+	go func() {
 		for {
 			time.Sleep(time.Second * 5) // delay after each request
 
