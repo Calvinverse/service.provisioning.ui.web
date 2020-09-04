@@ -29,6 +29,8 @@ RUN CGO_ENABLED=0\
   -o service.provisioning\
   ./cmd
 
+# Run tests
+
 #
 # ------------------- BUILD NPM ------------------------------
 #
