@@ -13,6 +13,15 @@ import (
 	"github.com/calvinverse/service.provisioning/internal/web"
 )
 
+func apiVersionCtx(version string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r = r.WithContext(context.WithValue(r.Context(), "api.version", version))
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func executeServer(cmd *cobra.Command, args []string) {
 	router := routes()
 
@@ -36,6 +45,7 @@ func routes() *chi.Mux {
 	// Use the api/v1 approach
 	//
 	router.Route("/api/v1", func(r chi.Router) {
+		r.Use(apiVersionCtx("v1"))
 		r.Mount("/self", health.Routes())
 	})
 
