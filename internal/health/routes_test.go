@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/calvinverse/service.provisioning/internal/info"
 )
 
 func TestRoutes(t *testing.T) {
@@ -26,6 +28,18 @@ func TestRoutes(t *testing.T) {
 	}
 
 	if !strings.HasPrefix(actualResult.Response, "Pong - ") {
-		t.Errorf("Handler returned wrong result: got %s wanted 'Pong'", actualResult.Response)
+		t.Errorf("Handler returned unexpected response: got %s wanted 'Pong'", actualResult.Response)
+	}
+
+	if actualResult.BuildTime != info.BuildTime() {
+		t.Errorf("Handler returned unexpected build time: got %s wanted %s", actualResult.BuildTime, info.BuildTime())
+	}
+
+	if actualResult.Revision != info.Revision() {
+		t.Errorf("Handler returned unexpected revision: got %s wanted %s", actualResult.Revision, info.Revision())
+	}
+
+	if actualResult.Version != info.Version() {
+		t.Errorf("Handler returned unexpected build time: got %s wanted %s", actualResult.Version, info.Version())
 	}
 }
