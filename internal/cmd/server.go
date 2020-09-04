@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/calvinverse/service.provisioning/internal/health"
 	"github.com/calvinverse/service.provisioning/internal/router"
@@ -34,7 +37,8 @@ func executeServer(cmd *cobra.Command, args []string) {
 		log.Panicf("Logging error: %s\n", err.Error())
 	}
 
-	log.Fatal(http.ListenAndServe(":8080", router)) // NOTE: Get port from config
+	port := viper.GetInt("service.port")
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
 }
 
 func routes() *chi.Mux {

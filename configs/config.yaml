@@ -1,5 +1,7 @@
 ---
 config:
+  service:
+    port: 8080
   consul:
     enabled: false
     host: localhost
