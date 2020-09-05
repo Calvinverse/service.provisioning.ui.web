@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -24,25 +25,48 @@ func LoadConfig(cfgFile string) {
 		viper.SetConfigFile(cfgFile)
 	}
 
-	// Only use consul if we have a host+port and consul key specified
-
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
+	}
+
+	// Only use consul if we have a host+port and consul key specified
+	if viper.IsSet("consul.enabled") && viper.GetBool("consul.enabled") {
+		loadFromConsul()
 	}
 }
 
 func loadFromConsul() {
-	// From Consul
-	viper.AddRemoteProvider("consul", "localhost:8500", "MY_CONSUL_KEY")
+
 	viper.SetConfigType("yaml")
+
+	consulHost := viper.GetString("consul.host")
+	consulPort := viper.GetInt("consul.port")
+	consulKeyPath := viper.GetString("consul.keyPath")
+	if err := viper.AddRemoteProvider("consul", fmt.Sprintf("%s:%d", consulHost, consulPort), consulKeyPath); err != nil {
+		log.Fatal(
+			fmt.Sprintf(
+				"Unable to connect to Consul at host %s:%d to read key %s. Error was %v",
+				consulHost,
+				consulPort,
+				consulKeyPath,
+				err))
+	}
+
+	if err := viper.ReadRemoteConfig(); err != nil {
+		log.Warn(
+			fmt.Sprintf(
+				"Unable to read the configuration from Consul at key $s via host %s:%d. Error was %v",
+				consulKeyPath,
+				consulHost,
+				consulPort,
+				err))
+	}
 
 	go func() {
 		for {
 			time.Sleep(time.Second * 5) // delay after each request
 
-			// currently, only tested with etcd support
-			err := viper.WatchRemoteConfig()
-			if err != nil {
+			if err := viper.WatchRemoteConfig(); err != nil {
 				log.Errorf("unable to read remote config: %v", err)
 				continue
 			}
