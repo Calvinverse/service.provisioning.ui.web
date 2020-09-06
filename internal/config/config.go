@@ -55,25 +55,35 @@ func loadFromConsul() {
 	if err := viper.ReadRemoteConfig(); err != nil {
 		log.Warn(
 			fmt.Sprintf(
-				"Unable to read the configuration from Consul at key $s via host %s:%d. Error was %v",
+				"Unable to read the configuration from Consul at key %s via host %s:%d. Error was %v",
 				consulKeyPath,
 				consulHost,
 				consulPort,
 				err))
 	}
 
+	// see: https://github.com/spf13/viper/issues/326
+	listenerCh := make(chan bool)
+
 	go func() {
 		for {
-			time.Sleep(time.Second * 5) // delay after each request
-
 			if err := viper.WatchRemoteConfig(); err != nil {
 				log.Errorf("unable to read remote config: %v", err)
 				continue
 			}
 
-			// unmarshal new config into our runtime config struct. you can also use channel
-			// to implement a signal to notify the system of the changes
-			viper.Unmarshal(&runtime_conf)
+			for {
+				time.Sleep(time.Second * 5) // delay after each request
+				listenerCh <- true
+			}
 		}
 	}()
+
+	for {
+		select {
+		case <-listenerCh:
+			fmt.Println("rereading remote config!")
+			viper.ReadRemoteConfig()
+		}
+	}
 }
