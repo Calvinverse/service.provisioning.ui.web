@@ -84,7 +84,7 @@ RUN mkdir -p /etc/service.provisioning && \
 
 COPY --from=build-go /app/service.provisioning /usr/bin
 
-COPY --from=build-go /configs/config.yaml /etc/service.provisioning
+COPY --from=build-go /app/configs/config.yaml /etc/service.provisioning
 
 COPY --from=build-node /web/dist/ /etc/service.provisioning/client
 
