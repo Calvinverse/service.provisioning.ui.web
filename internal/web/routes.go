@@ -1,9 +1,13 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/calvinverse/service.provisioning/internal/router"
 	"github.com/go-chi/chi"
@@ -14,8 +18,27 @@ import (
 
 // Routes exports the web routes
 func Routes(r *chi.Mux) {
-	workDir := viper.GetString("config.ui.path")
-	filesDir := filepath.Join(workDir, "client")
+
+	filesDir := ""
+	if viper.IsSet("ui.path") {
+		filesDir = viper.GetString("ui.path")
+	} else {
+		ex, err := os.Executable()
+		if err != nil {
+			log.Fatal(
+				fmt.Sprintf(
+					"Failed to locate the directory of the executable. Error was: %v",
+					err))
+		}
+
+		workDir := filepath.Dir(ex)
+		filesDir = filepath.Join(workDir, "client")
+	}
+
+	log.Debug(
+		fmt.Sprintf(
+			"Using UI directory %s",
+			filesDir))
 
 	// Load the index.html
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
