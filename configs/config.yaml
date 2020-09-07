@@ -4,3 +4,5 @@ consul:
   host: localhost
   keyPath: config/services/provisioning
   port: 8500
+log:
+  level: debug

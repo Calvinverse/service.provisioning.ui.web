@@ -3,8 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -38,7 +39,12 @@ func executeServer(cmd *cobra.Command, args []string) {
 	}
 
 	port := viper.GetInt("service.port")
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
+	hostAddress := fmt.Sprintf(":%d", port)
+	log.Debug(
+		fmt.Sprintf(
+			"Starting server on %s",
+			hostAddress))
+	log.Fatal(http.ListenAndServe(hostAddress, router))
 }
 
 func routes() *chi.Mux {
