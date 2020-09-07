@@ -1,10 +1,6 @@
 ---
-service:
-  port: 8080
 consul:
   enabled: false
   host: localhost
   keyPath: config/services/provisioning
   port: 8500
-ui:
-  path: /etc/service.provisioning/client

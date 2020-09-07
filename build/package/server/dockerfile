@@ -81,6 +81,9 @@ RUN cd /web && npm run lint && npm run build
 # Should grab our base container
 FROM testcalvinverse.azurecr.io/base.container.linux:latest
 
+ARG port=8080
+ARG ui_path=/etc/service.provisioning/client
+
 # Create a user and group first so the IDs get set the same way, even as
 # the rest of this may change over time.
 RUN addgroup provisioning && adduser provisioning --system --ingroup provisioning
@@ -90,16 +93,21 @@ RUN mkdir -p /etc/service.provisioning && \
   mkdir -p /etc/service/service.provisioning
 
 COPY --from=build-go /app/service.provisioning /usr/bin
+RUN /usr/bin/service.provisioning
 
 COPY --from=build-go /app/configs/config.yaml /etc/service.provisioning
 
-COPY --from=build-node /web/dist/ /etc/service.provisioning/client
+COPY --from=build-node /web/dist/ ${ui_path}
 
 COPY ./build/package/server/service.provisioning.sh /etc/service/service.provisioning/run
-
-RUN ls -la /etc/service.provisioning
 
 RUN dos2unix /etc/service/service.provisioning/run && \
   chmod +x /etc/service/service.provisioning/run
 
-EXPOSE 8080
+RUN ls -la /etc/service/service.provisioning
+
+ENV PROVISION_SERVICE_PORT ${port}
+ENV PROVISION_UI_PATH ${ui_path}
+ENV PROVISION_CONFIG_PATH /etc/service.provisioning/config.yaml
+
+EXPOSE ${port}
