@@ -58,6 +58,7 @@ function Invoke-Npm
             throw "NPM run build failed with exit code: $LASTEXITCODE"
         }
 
+        <#
         npm run test:unit
         if ($LASTEXITCODE -ne 0)
         {
@@ -69,6 +70,7 @@ function Invoke-Npm
         {
             throw "NPM run test:e2e failed with exit code: $LASTEXITCODE"
         }
+        #>
     }
     finally
     {
@@ -117,7 +119,7 @@ function New-LocalBuild
         New-Item -Path $absoluteOutputDir -ItemType Directory | Out-Null
     }
 
-    Invoke-Npm
+    Invoke-Npm -clientDirectory (Join-Path $absoluteOutputDir 'client')
 
     Copy-Item -Path (Join-Path $PSScriptRoot "configs" "*") -Destination $absoluteOutputDir -Force
     go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning/internal/info.version=$version" -o $outputDir/server.exe ./cmd
