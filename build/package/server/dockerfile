@@ -1,0 +1,113 @@
+
+#
+# ------------------- BUILD GOLANG ---------------------------
+#
+FROM golang:latest as build-go
+
+LABEL maintainer="Patrick van der Velde <petrikvandervelde@gmail.com"
+
+ARG NOW
+ARG REVISION
+ARG VERSION
+
+WORKDIR /app
+
+COPY go.mod .
+COPY configs/ ./configs
+COPY internal/ ./internal
+COPY cmd/ ./cmd
+
+RUN go mod download
+
+RUN CGO_ENABLED=0\
+  GOOS=linux\
+  go build\
+  -a\
+  -installsuffix cgo\
+  -v\
+  -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=${REVISION} -X github.com/calvinverse/service.provisioning/internal/info.buildTime=${NOW} -X github.com/calvinverse/service.provisioning/internal/info.version=${VERSION}"\
+  -o service.provisioning\
+  ./cmd
+
+# Run tests
+
+RUN CGO_ENABLED=0\
+  GOOS=linux\
+  go test -cover ./... \
+  ./cmd
+
+RUN ls -la /app
+
+#
+# ------------------- BUILD NPM ------------------------------
+#
+
+FROM node:alpine AS build-node
+
+RUN apk --no-cache add python2
+
+# This is required due to this issue: https://github.com/nodejs/node-gyp/issues/1236#issuecomment-309401410
+RUN mkdir /root/.npm-global && npm config set prefix '/root/.npm-global'
+
+ENV PATH="/root/.npm-global/bin:${PATH}"
+ENV NPM_CONFIG_LOGLEVEL warn
+ENV NPM_CONFIG_PREFIX=/root/.npm-global
+
+RUN npm install -g npm@latest
+
+# deps
+RUN mkdir -p /web
+
+COPY ./web/babel.config.js /web
+COPY ./web/package.json /web
+COPY ./web/package-lock.json /web
+COPY ./web/tsconfig.json /web
+COPY ./web/vue.config.js /web
+
+COPY ./web/public /web/public
+COPY ./web/src /web/src
+COPY ./web/tests /web/tests
+
+RUN cd /web && npm install
+
+# build
+RUN cd /web && npm run lint && npm run build
+# && npm run test:unit && npm run test:e2e
+
+#
+# ------------------- ASSEMBLE --------------------------------
+#
+
+# Should grab our base container
+FROM testcalvinverse.azurecr.io/base.container.linux:latest
+
+ARG port=8080
+ARG ui_path=/etc/service.provisioning/client
+
+# Create a user and group first so the IDs get set the same way, even as
+# the rest of this may change over time.
+RUN addgroup provisioning && adduser provisioning --system --ingroup provisioning
+
+RUN mkdir -p /etc/service.provisioning && \
+  chown -R provisioning:provisioning /etc/service.provisioning && \
+  mkdir -p /etc/service/service.provisioning
+
+COPY --from=build-go /app/service.provisioning /usr/bin
+RUN /usr/bin/service.provisioning
+
+COPY --from=build-go /app/configs/config.yaml /etc/service.provisioning
+
+COPY --from=build-node /web/dist/ ${ui_path}
+
+COPY ./build/package/server/service.provisioning.sh /etc/service/service.provisioning/run
+
+RUN dos2unix /etc/service/service.provisioning/run && \
+  chmod +x /etc/service/service.provisioning/run
+
+RUN ls -la /etc/service/service.provisioning
+
+ENV PROVISION_SERVICE_PORT ${port}
+ENV PROVISION_UI_PATH ${ui_path}
+ENV PROVISION_CONFIG_PATH /etc/service.provisioning/config.yaml
+
+EXPOSE ${port}
