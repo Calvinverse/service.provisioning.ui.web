@@ -16,17 +16,27 @@ import (
 // LoadConfig loads the configuration for the application from different configuration sources
 func LoadConfig(cfgFile string) {
 
+	log.Debug("Reading configuration ...")
+
 	// From the environment
 	viper.SetEnvPrefix("PROVISION")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
 	if cfgFile != "" {
+		log.Debug(
+			fmt.Sprintf(
+				"Reading configuration from: %s",
+				cfgFile))
+
 		viper.SetConfigFile(cfgFile)
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal(err)
+		log.Fatal(
+			fmt.Sprintf(
+				"Configuration invalid. Error was %v",
+				err))
 	}
 
 	// Only use consul if we have a host+port and consul key specified
@@ -42,6 +52,13 @@ func loadFromConsul() {
 	consulHost := viper.GetString("consul.host")
 	consulPort := viper.GetInt("consul.port")
 	consulKeyPath := viper.GetString("consul.keyPath")
+	log.Debug(
+		fmt.Sprintf(
+			"Reading configuration from Consul on host %s:%d via key %s.",
+			consulHost,
+			consulPort,
+			consulKeyPath))
+
 	if err := viper.AddRemoteProvider("consul", fmt.Sprintf("%s:%d", consulHost, consulPort), consulKeyPath); err != nil {
 		log.Fatal(
 			fmt.Sprintf(
