@@ -31,6 +31,13 @@ RUN CGO_ENABLED=0\
 
 # Run tests
 
+RUN CGO_ENABLED=0\
+  GOOS=linux\
+  go test -cover ./... \
+  ./cmd
+
+RUN ls -la /app
+
 #
 # ------------------- BUILD NPM ------------------------------
 #
