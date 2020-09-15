@@ -4,6 +4,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/calvinverse/service.provisioning/internal/cmd"
+	"github.com/calvinverse/service.provisioning/internal/config"
+	"github.com/calvinverse/service.provisioning/internal/health"
+	"github.com/calvinverse/service.provisioning/internal/router"
+	"github.com/calvinverse/service.provisioning/internal/web"
 )
 
 // Resolver defines the interface for Inversion-of-Control objects.
@@ -12,33 +16,43 @@ type Resolver interface {
 }
 
 // NewResolver returns a new Resolver instance
-func NewResolver(config Configuration) Resolver {
-	return &concreteResolver{
-		config: config,
+func NewResolver(config config.Configuration) Resolver {
+	return &resolver{
+		cfg: config,
 	}
 }
 
-// Resolver provides the data and methods to resolve types in the service.
-type concreteResolver struct {
-	config Configuration
+type resolver struct {
+	cfg config.Configuration
 
 	commands []*cobra.Command
 }
 
-func (r *concreteResolver) ResolveRouter() *foo.HTTPClient {
-	return foo.NewHTTPClient(
-		r.ResolveLogger(),
-		r.config.HTTP,
-	)
+func (r *resolver) resolveApiRouters() []router.APIRouter {
+	healthRouter := health.NewHealthAPIRouter()
+	return []router.APIRouter{
+		healthRouter,
+	}
 }
 
-// ResolveCommands returns a collection of commands for the application.
-func (r *concreteResolver) ResolveCommands() []*cobra.Command {
+func (r *resolver) ResolveCommands() []*cobra.Command {
+	routerBuilder := r.resolveRouterBuilder()
+	serverCommandBuilder := cmd.NewCommandBuilder(r.cfg, routerBuilder)
 	if r.commands == nil {
 		r.commands = []*cobra.Command{
-			cmd.ServerCmd,
+			serverCommandBuilder.New(),
 		}
 	}
 
 	return r.commands
+}
+
+func (r *resolver) resolveRouterBuilder() router.Builder {
+	apiRouters := r.resolveApiRouters()
+	webRouter := r.resolveWebRouter()
+	return router.NewRouterBuilder(apiRouters, webRouter)
+}
+
+func (r *resolver) resolveWebRouter() router.WebRouter {
+	return web.NewWebRouter()
 }

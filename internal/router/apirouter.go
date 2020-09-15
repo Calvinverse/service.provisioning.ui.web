@@ -4,8 +4,14 @@ import (
 	"github.com/go-chi/chi"
 )
 
-type ApiRouter interface {
-	ApiRoutes() *chi.Mux
+// APIRouter provides a Chi Mux that contains a set of API routes.
+type APIRouter interface {
+	// Prefix is the prefix of the API method, e.g. self or template.
+	Prefix() string
 
-	ApiVersion() int8
+	/// Routes provides the different routes for this APIRouter
+	Routes() *chi.Mux
+
+	// Version returns the API version for the routes.
+	Version() int8
 }

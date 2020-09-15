@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/calvinverse/service.provisioning/internal/info"
+	"github.com/calvinverse/service.provisioning/internal/router"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )
@@ -18,16 +19,14 @@ type PingResponse struct {
 	Version   string `json:"version"`
 }
 
-// Routes creates the routes for the health package
-func Routes() *chi.Mux {
-	router := chi.NewRouter()
-
-	router.Get("/ping", ping)
-
-	return router
+// NewHealthAPIRouter returns an APIRouter instance for the health routes.
+func NewHealthAPIRouter() router.APIRouter {
+	return &healthRouter{}
 }
 
-func ping(w http.ResponseWriter, r *http.Request) {
+type healthRouter struct{}
+
+func (h *healthRouter) ping(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
 	response := PingResponse{
@@ -38,4 +37,21 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, response)
+}
+
+func (h *healthRouter) Prefix() string {
+	return "self"
+}
+
+// Routes creates the routes for the health package
+func (h *healthRouter) Routes() *chi.Mux {
+	router := chi.NewRouter()
+
+	router.Get("/ping", h.ping)
+
+	return router
+}
+
+func (h *healthRouter) Version() int8 {
+	return 1
 }

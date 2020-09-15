@@ -11,13 +11,19 @@ import (
 
 	"github.com/calvinverse/service.provisioning/internal/router"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 
 	"github.com/spf13/viper"
 )
 
+// NewWebRouter returns a new router.WebRouter instance
+func NewWebRouter() router.WebRouter {
+	return &webRouter{}
+}
+
+type webRouter struct{}
+
 // Routes exports the web routes
-func Routes(r *chi.Mux) {
+func (w *webRouter) Routes(r *chi.Mux, rootRouter func() chi.Router) {
 
 	filesDir := ""
 	if viper.IsSet("ui.path") {
@@ -49,14 +55,14 @@ func Routes(r *chi.Mux) {
 		http.ServeFile(w, r, filesDir+"/favicon.ico")
 	})
 
-	fileServer(r, "/css", http.Dir(filesDir+"/css"))
-	fileServer(r, "/img", http.Dir(filesDir+"/img"))
-	fileServer(r, "/js", http.Dir(filesDir+"/js"))
+	w.fileServer(r, "/css", http.Dir(filesDir+"/css"))
+	w.fileServer(r, "/img", http.Dir(filesDir+"/img"))
+	w.fileServer(r, "/js", http.Dir(filesDir+"/js"))
 
 	r.Mount("/", rootRouter())
 }
 
-func fileServer(r chi.Router, path string, root http.FileSystem) {
+func (w *webRouter) fileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit any URL parameters")
 	}
@@ -76,10 +82,10 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	})
 }
 
-func rootRouter() chi.Router {
-	r := router.NewChiRouter()
+// func rootRouter() chi.Router {
+// 	r := router.NewChiRouter()
 
-	r.Use(middleware.NoCache)
+// 	r.Use(middleware.NoCache)
 
-	return r
-}
+// 	return r
+// }

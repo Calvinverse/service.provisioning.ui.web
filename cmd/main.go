@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/calvinverse/service.provisioning/internal/config"
 	"github.com/calvinverse/service.provisioning/internal/info"
 	"github.com/calvinverse/service.provisioning/internal/service"
 )
@@ -14,9 +15,9 @@ import (
 var (
 	cfgFile string
 
-	cfg service.Configuration
+	cfg config.Configuration
 
-	resolver *service.Resolver
+	resolver service.Resolver
 
 	rootCmd = &cobra.Command{
 		Use:     "service.provisioning",
@@ -27,7 +28,7 @@ var (
 func init() {
 	initializeLogger()
 
-	cfg := service.NewConfiguration()
+	cfg := config.NewConfiguration()
 	resolver := service.NewResolver(cfg)
 
 	cobra.OnInitialize(initializeConfiguration)

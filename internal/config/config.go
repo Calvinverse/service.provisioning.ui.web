@@ -1,4 +1,4 @@
-package service
+package config
 
 import (
 	"fmt"
@@ -15,6 +15,8 @@ import (
 
 // Configuration defines the interface for configuration objects
 type Configuration interface {
+	GetInt(key string) int
+
 	GetString(key string) string
 
 	IsSet(key string) bool
@@ -30,6 +32,10 @@ func NewConfiguration() Configuration {
 // concreteConfig implements the Configuration interface
 type concreteConfig struct {
 	*viper.Viper
+}
+
+func (c concreteConfig) GetInt(key string) int {
+	return c.Viper.GetInt(key)
 }
 
 func (c concreteConfig) GetString(key string) string {

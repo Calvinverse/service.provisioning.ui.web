@@ -7,16 +7,14 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/sirupsen/logrus"
-
-	"github.com/calvinverse/service.provisioning/internal/logger"
 )
 
-type StructuredLogger struct {
+type structuredLogger struct {
 	Logger *logrus.Logger
 }
 
-func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
-	entry := &logger.StructuredLoggerEntry{Logger: logrus.NewEntry(l.Logger)}
+func (l *structuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
+	entry := &structuredLoggerEntry{Logger: logrus.NewEntry(l.Logger)}
 	logFields := logrus.Fields{}
 
 	logFields["ts"] = time.Now().UTC().Format(time.RFC1123)
