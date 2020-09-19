@@ -26,34 +26,36 @@ type Configuration interface {
 
 // NewConfiguration returns a new Configuration instance
 func NewConfiguration() Configuration {
-	return &concreteConfig{}
+	return &concreteConfig{
+		cfg: viper.New(),
+	}
 }
 
 // concreteConfig implements the Configuration interface
 type concreteConfig struct {
-	*viper.Viper
+	cfg *viper.Viper
 }
 
-func (c concreteConfig) GetInt(key string) int {
-	return c.Viper.GetInt(key)
+func (c *concreteConfig) GetInt(key string) int {
+	return c.cfg.GetInt(key)
 }
 
-func (c concreteConfig) GetString(key string) string {
-	return c.Viper.GetString(key)
+func (c *concreteConfig) GetString(key string) string {
+	return c.cfg.GetString(key)
 }
 
-func (c concreteConfig) IsSet(key string) bool {
-	return c.Viper.IsSet(key)
+func (c *concreteConfig) IsSet(key string) bool {
+	return c.cfg.IsSet(key)
 }
 
 // LoadConfiguration loads the configuration for the application from different configuration sources
-func (c concreteConfig) LoadConfiguration(cfgFile string) error {
+func (c *concreteConfig) LoadConfiguration(cfgFile string) error {
 	log.Debug("Reading configuration ...")
 
 	// From the environment
-	c.SetEnvPrefix("PROVISION")
-	c.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	c.AutomaticEnv()
+	c.cfg.SetEnvPrefix("PROVISION")
+	c.cfg.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	c.cfg.AutomaticEnv()
 
 	if cfgFile != "" {
 		log.Debug(
@@ -61,10 +63,10 @@ func (c concreteConfig) LoadConfiguration(cfgFile string) error {
 				"Reading configuration from: %s",
 				cfgFile))
 
-		c.SetConfigFile(cfgFile)
+		c.cfg.SetConfigFile(cfgFile)
 	}
 
-	if err := c.ReadInConfig(); err != nil {
+	if err := c.cfg.ReadInConfig(); err != nil {
 		log.Fatal(
 			fmt.Sprintf(
 				"Configuration invalid. Error was %v",
@@ -72,16 +74,16 @@ func (c concreteConfig) LoadConfiguration(cfgFile string) error {
 	}
 
 	// Only use consul if we have a host+port and consul key specified
-	if c.IsSet("consul.enabled") && c.GetBool("consul.enabled") {
+	if c.cfg.IsSet("consul.enabled") && c.cfg.GetBool("consul.enabled") {
 		c.loadFromConsul()
 	}
 
 	return nil
 }
 
-func (c concreteConfig) loadFromConsul() {
+func (c *concreteConfig) loadFromConsul() {
 
-	c.SetConfigType("yaml")
+	c.cfg.SetConfigType("yaml")
 
 	consulHost := c.GetString("consul.host")
 	consulPort := c.GetInt("consul.port")
@@ -93,7 +95,7 @@ func (c concreteConfig) loadFromConsul() {
 			consulPort,
 			consulKeyPath))
 
-	if err := c.AddRemoteProvider("consul", fmt.Sprintf("%s:%d", consulHost, consulPort), consulKeyPath); err != nil {
+	if err := c.cfg.AddRemoteProvider("consul", fmt.Sprintf("%s:%d", consulHost, consulPort), consulKeyPath); err != nil {
 		log.Fatal(
 			fmt.Sprintf(
 				"Unable to connect to Consul at host %s:%d to read key %s. Error was %v",
@@ -103,7 +105,7 @@ func (c concreteConfig) loadFromConsul() {
 				err))
 	}
 
-	if err := c.ReadRemoteConfig(); err != nil {
+	if err := c.cfg.ReadRemoteConfig(); err != nil {
 		log.Warn(
 			fmt.Sprintf(
 				"Unable to read the configuration from Consul at key %s via host %s:%d. Error was %v",
@@ -118,7 +120,7 @@ func (c concreteConfig) loadFromConsul() {
 
 	go func() {
 		for {
-			if err := c.WatchRemoteConfig(); err != nil {
+			if err := c.cfg.WatchRemoteConfig(); err != nil {
 				log.Errorf("unable to read remote config: %v", err)
 				continue
 			}
@@ -134,7 +136,7 @@ func (c concreteConfig) loadFromConsul() {
 		select {
 		case <-listenerCh:
 			fmt.Println("rereading remote config!")
-			c.ReadRemoteConfig()
+			c.cfg.ReadRemoteConfig()
 		}
 	}
 }
