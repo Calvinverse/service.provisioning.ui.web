@@ -54,5 +54,5 @@ func (r *resolver) resolveRouterBuilder() router.Builder {
 }
 
 func (r *resolver) resolveWebRouter() router.WebRouter {
-	return web.NewWebRouter()
+	return web.NewWebRouter(r.cfg)
 }

@@ -9,25 +9,28 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/calvinverse/service.provisioning/internal/config"
 	"github.com/calvinverse/service.provisioning/internal/router"
 	"github.com/go-chi/chi"
-
-	"github.com/spf13/viper"
 )
 
 // NewWebRouter returns a new router.WebRouter instance
-func NewWebRouter() router.WebRouter {
-	return &webRouter{}
+func NewWebRouter(config config.Configuration) router.WebRouter {
+	return &webRouter{
+		cfg: config,
+	}
 }
 
-type webRouter struct{}
+type webRouter struct {
+	cfg config.Configuration
+}
 
 // Routes exports the web routes
 func (w *webRouter) Routes(r *chi.Mux, rootRouter func() chi.Router) {
 
 	filesDir := ""
-	if viper.IsSet("ui.path") {
-		filesDir = viper.GetString("ui.path")
+	if w.cfg.IsSet("ui.path") {
+		filesDir = w.cfg.GetString("ui.path")
 	} else {
 		ex, err := os.Executable()
 		if err != nil {
