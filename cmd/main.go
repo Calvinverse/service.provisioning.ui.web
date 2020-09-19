@@ -28,7 +28,7 @@ var (
 func init() {
 	initializeLogger()
 
-	cfg := config.NewConfiguration()
+	cfg = config.NewConfiguration()
 	resolver := service.NewResolver(cfg)
 
 	cobra.OnInitialize(initializeConfiguration)
