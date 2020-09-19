@@ -71,17 +71,20 @@ func (c *concreteConfig) LoadConfiguration(cfgFile string) error {
 			fmt.Sprintf(
 				"Configuration invalid. Error was %v",
 				err))
+		return err
 	}
 
 	// Only use consul if we have a host+port and consul key specified
 	if c.cfg.IsSet("consul.enabled") && c.cfg.GetBool("consul.enabled") {
-		c.loadFromConsul()
+		if err := c.loadFromConsul(); err != nil {
+
+		}
 	}
 
 	return nil
 }
 
-func (c *concreteConfig) loadFromConsul() {
+func (c *concreteConfig) loadFromConsul() error {
 
 	c.cfg.SetConfigType("yaml")
 
@@ -103,40 +106,35 @@ func (c *concreteConfig) loadFromConsul() {
 				consulPort,
 				consulKeyPath,
 				err))
+		return err
 	}
 
 	if err := c.cfg.ReadRemoteConfig(); err != nil {
 		log.Warn(
 			fmt.Sprintf(
-				"Unable to read the configuration from Consul at key %s via host %s:%d. Error was %v",
+				"Unable to read the configuration from Consul at key %s via host %s:%d at the moment. Error was %v",
 				consulKeyPath,
 				consulHost,
 				consulPort,
 				err))
-	}
 
-	// see: https://github.com/spf13/viper/issues/326
-	listenerCh := make(chan bool)
+		// Don't return the error here because the inability to read from consul might be because the Consul
+		// instance is currently not reachable. So we will continue to try.
+	}
 
 	go func() {
 		for {
+			time.Sleep(time.Second * 5) // delay after each request
+
 			if err := c.cfg.WatchRemoteConfig(); err != nil {
 				log.Errorf("unable to read remote config: %v", err)
 				continue
 			}
 
-			for {
-				time.Sleep(time.Second * 5) // delay after each request
-				listenerCh <- true
-			}
-		}
-	}()
-
-	for {
-		select {
-		case <-listenerCh:
 			fmt.Println("rereading remote config!")
 			c.cfg.ReadRemoteConfig()
 		}
-	}
+	}()
+
+	return nil
 }
