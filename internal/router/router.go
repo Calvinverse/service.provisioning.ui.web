@@ -1,24 +1,76 @@
 package router
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 	"github.com/sirupsen/logrus"
-
-	"github.com/calvinverse/service.provisioning/internal/logger"
 )
 
-func NewChiRouter() *chi.Mux {
+// Builder is used to create a new Chi Mux with all the routes and configurations set.
+type Builder interface {
+	New() *chi.Mux
+}
+
+// NewRouterBuilder creates a new instance of the Builder interface.
+func NewRouterBuilder(apiRouters []APIRouter, webRouter WebRouter) Builder {
+	return &routerBuilder{
+		apiRouters: apiRouters,
+		webRouter:  webRouter,
+	}
+}
+
+type routerBuilder struct {
+	apiRouters []APIRouter
+	webRouter  WebRouter
+}
+
+func (rb routerBuilder) apiVersionCtx(version string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r = r.WithContext(context.WithValue(r.Context(), "api.version", version))
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func (rb routerBuilder) New() *chi.Mux {
 	logger := logrus.New()
 	logger.Formatter = &logrus.JSONFormatter{
 		DisableTimestamp: true,
 	}
 
+	router := rb.newChiRouter(logger)
+
+	// Based on this post and the comments: https://www.troyhunt.com/your-api-versioning-is-wrong-which-is/
+	// Use the api/v1 approach
+	//
+	router.Route("/api", func(r chi.Router) {
+		for _, ar := range rb.apiRouters {
+			r.Use(rb.apiVersionCtx(
+				fmt.Sprintf(
+					"v%d",
+					ar.Version())))
+			r.Mount(
+				fmt.Sprintf(
+					"/v%d/%s",
+					ar.Version(),
+					ar.Prefix(),
+				),
+				ar.Routes())
+		}
+	})
+
+	rb.webRouter.Routes(router, func() chi.Router { return rb.newChiRouter(logger) })
+
+	return router
+}
+
+func (rb routerBuilder) newChiRouter(logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
 		render.SetContentType(render.ContentTypeJSON),
@@ -26,45 +78,13 @@ func NewChiRouter() *chi.Mux {
 		middleware.Recoverer,
 	)
 
-	router.Use(newStructuredLogger(logger))
+	router.Use(rb.newStructuredLogger(logger))
+
+	router.Use(render.SetContentType(render.ContentTypeJSON))
 
 	return router
 }
 
-func newStructuredLogger(l *logrus.Logger) func(next http.Handler) http.Handler {
-	return middleware.RequestLogger(&StructuredLogger{l})
-}
-
-type StructuredLogger struct {
-	Logger *logrus.Logger
-}
-
-func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
-	entry := &logger.StructuredLoggerEntry{Logger: logrus.NewEntry(l.Logger)}
-	logFields := logrus.Fields{}
-
-	logFields["ts"] = time.Now().UTC().Format(time.RFC1123)
-
-	if reqID := middleware.GetReqID(r.Context()); reqID != "" {
-		logFields["req_id"] = reqID
-	}
-
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
-	logFields["http_scheme"] = scheme
-	logFields["http_proto"] = r.Proto
-	logFields["http_method"] = r.Method
-
-	logFields["remote_add"] = r.RemoteAddr
-	logFields["user_agent"] = r.UserAgent()
-
-	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
-
-	entry.Logger = entry.Logger.WithFields(logFields)
-
-	entry.Logger.Infoln("request started")
-
-	return entry
+func (rb routerBuilder) newStructuredLogger(l *logrus.Logger) func(next http.Handler) http.Handler {
+	return middleware.RequestLogger(&structuredLogger{l})
 }

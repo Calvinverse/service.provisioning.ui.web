@@ -13,15 +13,49 @@ import (
 	_ "github.com/spf13/viper/remote"
 )
 
-// LoadConfig loads the configuration for the application from different configuration sources
-func LoadConfig(cfgFile string) {
+// Configuration defines the interface for configuration objects
+type Configuration interface {
+	GetInt(key string) int
 
+	GetString(key string) string
+
+	IsSet(key string) bool
+
+	LoadConfiguration(cfgFile string) error
+}
+
+// NewConfiguration returns a new Configuration instance
+func NewConfiguration() Configuration {
+	return &concreteConfig{
+		cfg: viper.New(),
+	}
+}
+
+// concreteConfig implements the Configuration interface
+type concreteConfig struct {
+	cfg *viper.Viper
+}
+
+func (c *concreteConfig) GetInt(key string) int {
+	return c.cfg.GetInt(key)
+}
+
+func (c *concreteConfig) GetString(key string) string {
+	return c.cfg.GetString(key)
+}
+
+func (c *concreteConfig) IsSet(key string) bool {
+	return c.cfg.IsSet(key)
+}
+
+// LoadConfiguration loads the configuration for the application from different configuration sources
+func (c *concreteConfig) LoadConfiguration(cfgFile string) error {
 	log.Debug("Reading configuration ...")
 
 	// From the environment
-	viper.SetEnvPrefix("PROVISION")
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv()
+	c.cfg.SetEnvPrefix("PROVISION")
+	c.cfg.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	c.cfg.AutomaticEnv()
 
 	if cfgFile != "" {
 		log.Debug(
@@ -29,29 +63,34 @@ func LoadConfig(cfgFile string) {
 				"Reading configuration from: %s",
 				cfgFile))
 
-		viper.SetConfigFile(cfgFile)
+		c.cfg.SetConfigFile(cfgFile)
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
+	if err := c.cfg.ReadInConfig(); err != nil {
 		log.Fatal(
 			fmt.Sprintf(
 				"Configuration invalid. Error was %v",
 				err))
+		return err
 	}
 
 	// Only use consul if we have a host+port and consul key specified
-	if viper.IsSet("consul.enabled") && viper.GetBool("consul.enabled") {
-		loadFromConsul()
+	if c.cfg.IsSet("consul.enabled") && c.cfg.GetBool("consul.enabled") {
+		if err := c.loadFromConsul(); err != nil {
+
+		}
 	}
+
+	return nil
 }
 
-func loadFromConsul() {
+func (c *concreteConfig) loadFromConsul() error {
 
-	viper.SetConfigType("yaml")
+	c.cfg.SetConfigType("yaml")
 
-	consulHost := viper.GetString("consul.host")
-	consulPort := viper.GetInt("consul.port")
-	consulKeyPath := viper.GetString("consul.keyPath")
+	consulHost := c.GetString("consul.host")
+	consulPort := c.GetInt("consul.port")
+	consulKeyPath := c.GetString("consul.keyPath")
 	log.Debug(
 		fmt.Sprintf(
 			"Reading configuration from Consul on host %s:%d via key %s.",
@@ -59,7 +98,7 @@ func loadFromConsul() {
 			consulPort,
 			consulKeyPath))
 
-	if err := viper.AddRemoteProvider("consul", fmt.Sprintf("%s:%d", consulHost, consulPort), consulKeyPath); err != nil {
+	if err := c.cfg.AddRemoteProvider("consul", fmt.Sprintf("%s:%d", consulHost, consulPort), consulKeyPath); err != nil {
 		log.Fatal(
 			fmt.Sprintf(
 				"Unable to connect to Consul at host %s:%d to read key %s. Error was %v",
@@ -67,40 +106,35 @@ func loadFromConsul() {
 				consulPort,
 				consulKeyPath,
 				err))
+		return err
 	}
 
-	if err := viper.ReadRemoteConfig(); err != nil {
+	if err := c.cfg.ReadRemoteConfig(); err != nil {
 		log.Warn(
 			fmt.Sprintf(
-				"Unable to read the configuration from Consul at key %s via host %s:%d. Error was %v",
+				"Unable to read the configuration from Consul at key %s via host %s:%d at the moment. Error was %v",
 				consulKeyPath,
 				consulHost,
 				consulPort,
 				err))
-	}
 
-	// see: https://github.com/spf13/viper/issues/326
-	listenerCh := make(chan bool)
+		// Don't return the error here because the inability to read from consul might be because the Consul
+		// instance is currently not reachable. So we will continue to try.
+	}
 
 	go func() {
 		for {
-			if err := viper.WatchRemoteConfig(); err != nil {
+			time.Sleep(time.Second * 5) // delay after each request
+
+			if err := c.cfg.WatchRemoteConfig(); err != nil {
 				log.Errorf("unable to read remote config: %v", err)
 				continue
 			}
 
-			for {
-				time.Sleep(time.Second * 5) // delay after each request
-				listenerCh <- true
-			}
+			fmt.Println("rereading remote config!")
+			c.cfg.ReadRemoteConfig()
 		}
 	}()
 
-	for {
-		select {
-		case <-listenerCh:
-			fmt.Println("rereading remote config!")
-			viper.ReadRemoteConfig()
-		}
-	}
+	return nil
 }

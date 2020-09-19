@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [string] $dockerTags = '',
     [switch] $Direct = $false
 )
 
@@ -91,7 +92,8 @@ function New-Container
     param (
         [string] $sha1,
         [string] $version,
-        [string] $date
+        [string] $date,
+        [string[]] $dockerTags = @()
     )
 
     Write-Output "Building Docker container with build arguments:"
@@ -100,7 +102,26 @@ function New-Container
     Write-Output "VERSION = $version"
     Write-Output "Tagging with: service-provisioning:$version"
 
-    docker build --force-rm --build-arg NOW=$date --build-arg REVISION=$sha1 --build-arg VERSION=$version --file ./build/package/server/dockerfile --tag service-provisioning:$version .
+    $command = "docker build"
+    $command += " --force-rm"
+    $command += " --build-arg NOW=$date"
+    $command += " --build-arg REVISION=$sha1"
+    $command += " --build-arg VERSION=$version"
+    $command += " --file ./build/package/server/dockerfile"
+
+    if ($dockerTags.Length -gt 0)
+    {
+        foreach($tag in $dockerTags)
+        {
+            $command += " --tag $($tag)/service-provisioning:$version"
+        }
+    }
+
+    $command += " --tag service-provisioning:$version"
+    $command += " ."
+
+    Write-Output "Invoking: $command"
+    Invoke-Expression -Command $command
 }
 
 function New-LocalBuild
@@ -113,16 +134,27 @@ function New-LocalBuild
     )
 
     $outputDir = './bin'
-    $absoluteOutputDir = Join-Path $PSScriptRoot $outputDir
+    $absoluteOutputDir = [System.IO.Path]::GetFullPath($(Join-Path $PSScriptRoot $outputDir))
     if (-not (Test-Path $absoluteOutputDir))
     {
         New-Item -Path $absoluteOutputDir -ItemType Directory | Out-Null
     }
 
-    Invoke-Npm -clientDirectory (Join-Path $absoluteOutputDir 'client')
+    $clientDirectory = Join-Path $absoluteOutputDir 'client'
+    Invoke-Npm -clientDirectory $clientDirectory
 
     Copy-Item -Path (Join-Path $PSScriptRoot "configs" "*") -Destination $absoluteOutputDir -Force
+
+    $configPath = Join-Path $absoluteOutputDir 'config.yaml'
+    Add-Content -Path $configPath -Value 'ui:'
+    Add-Content -Path $configPath -Value "  path: $clientDirectory"
+
+    Add-Content -Path $configPath -Value 'service:'
+    Add-Content -Path $configPath -Value '  port: 8080'
+
     go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning/internal/info.version=$version" -o $outputDir/server.exe ./cmd
+
+    go test -cover ./... ./cmd
 }
 
 $revision = Get-Revision
@@ -135,6 +167,6 @@ if ($Direct)
 }
 else
 {
-    New-Container -date $date -sha1 $revision -version $version
+    New-Container -date $date -sha1 $revision -version $version -dockerTags $($dockerTags.Split(','))
 }
 

@@ -14,7 +14,8 @@ func TestRoutes(t *testing.T) {
 	request, _ := http.NewRequest("GET", "/ping", nil)
 	w := httptest.NewRecorder()
 
-	router := Routes()
+	instance := &healthRouter{}
+	router := instance.Routes()
 	router.ServeHTTP(w, request)
 
 	actualResult := PingResponse{}

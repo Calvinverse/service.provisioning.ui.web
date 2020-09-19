@@ -6,39 +6,46 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
-	"github.com/calvinverse/service.provisioning/internal/cmd"
 	"github.com/calvinverse/service.provisioning/internal/config"
 	"github.com/calvinverse/service.provisioning/internal/info"
+	"github.com/calvinverse/service.provisioning/internal/service"
 )
 
 var (
 	cfgFile string
 
+	cfg config.Configuration
+
+	resolver service.Resolver
+
 	rootCmd = &cobra.Command{
-		Use: "service.provisioning",
+		Use:     "service.provisioning",
+		Version: info.Version(),
 	}
 )
 
 func init() {
 	initializeLogger()
 
+	cfg = config.NewConfiguration()
+	resolver := service.NewResolver(cfg)
+
 	cobra.OnInitialize(initializeConfiguration)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 
-	rootCmd.AddCommand(cmd.ServerCmd)
-
-	rootCmd.Version = info.Version()
+	for _, subCommand := range resolver.ResolveCommands() {
+		rootCmd.AddCommand(subCommand)
+	}
 }
 
 func initializeConfiguration() {
 	log.Debug("Initializing. Loading configuration ...")
-	config.LoadConfig(cfgFile)
+	cfg.LoadConfiguration(cfgFile)
 
-	if viper.IsSet("log.level") {
-		switch level := viper.GetString("log.level"); level {
+	if cfg.IsSet("log.level") {
+		switch level := cfg.GetString("log.level"); level {
 		case "trace":
 			log.SetLevel(log.TraceLevel)
 		case "debug":
