@@ -37,11 +37,11 @@ func (s serverCommandBuilder) New() *cobra.Command {
 		Use:   "server",
 		Short: "Runs the application as a server",
 		Long:  "Runs the service.provisioning application in server mode",
-		Run:   s.executeServer,
+		RunE:  s.executeServer,
 	}
 }
 
-func (s serverCommandBuilder) executeServer(cmd *cobra.Command, args []string) {
+func (s serverCommandBuilder) executeServer(cmd *cobra.Command, args []string) error {
 	router := s.builder.New()
 
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
@@ -51,6 +51,7 @@ func (s serverCommandBuilder) executeServer(cmd *cobra.Command, args []string) {
 
 	if err := chi.Walk(router, walkFunc); err != nil {
 		log.Panicf("Logging error: %s\n", err.Error())
+		return err
 	}
 
 	port := s.cfg.GetInt("service.port")
@@ -59,5 +60,10 @@ func (s serverCommandBuilder) executeServer(cmd *cobra.Command, args []string) {
 		fmt.Sprintf(
 			"Starting server on %s",
 			hostAddress))
-	log.Fatal(http.ListenAndServe(hostAddress, router))
+	if err := http.ListenAndServe(hostAddress, router); err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
 }
