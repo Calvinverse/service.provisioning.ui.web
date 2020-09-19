@@ -84,11 +84,3 @@ func (w *webRouter) fileServer(r chi.Router, path string, root http.FileSystem) 
 		fs.ServeHTTP(w, r)
 	})
 }
-
-// func rootRouter() chi.Router {
-// 	r := router.NewChiRouter()
-
-// 	r.Use(middleware.NoCache)
-
-// 	return r
-// }
