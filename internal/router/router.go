@@ -57,7 +57,7 @@ func (rb routerBuilder) New() *chi.Mux {
 					ar.Version())))
 			r.Mount(
 				fmt.Sprintf(
-					"v%d/%s",
+					"/v%d/%s",
 					ar.Version(),
 					ar.Prefix(),
 				),
