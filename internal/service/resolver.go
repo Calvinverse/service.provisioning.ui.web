@@ -28,7 +28,7 @@ type resolver struct {
 	commands []*cobra.Command
 }
 
-func (r *resolver) resolveApiRouters() []router.APIRouter {
+func (r *resolver) resolveAPIRouters() []router.APIRouter {
 	healthRouter := health.NewHealthAPIRouter()
 	return []router.APIRouter{
 		healthRouter,
@@ -48,7 +48,7 @@ func (r *resolver) ResolveCommands() []*cobra.Command {
 }
 
 func (r *resolver) resolveRouterBuilder() router.Builder {
-	apiRouters := r.resolveApiRouters()
+	apiRouters := r.resolveAPIRouters()
 	webRouter := r.resolveWebRouter()
 	return router.NewRouterBuilder(apiRouters, webRouter)
 }
