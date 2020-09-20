@@ -26,6 +26,13 @@ func NewHealthAPIRouter() router.APIRouter {
 
 type healthRouter struct{}
 
+// Ping godoc
+// @Summary Respond to a ping request
+// @Description Respond to a ping request with information about the application.
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} health.PingResponse
+// @Router /api/v1/self/ping [get]
 func (h *healthRouter) ping(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
