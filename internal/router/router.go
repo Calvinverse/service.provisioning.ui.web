@@ -17,7 +17,9 @@ type Builder interface {
 }
 
 // NewRouterBuilder creates a new instance of the Builder interface.
-func NewRouterBuilder(apiRouters []APIRouter, webRouter WebRouter) Builder {
+func NewRouterBuilder(
+	apiRouters []APIRouter,
+	webRouter WebRouter) Builder {
 	return &routerBuilder{
 		apiRouters: apiRouters,
 		webRouter:  webRouter,
