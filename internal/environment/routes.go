@@ -19,6 +19,10 @@ func NewEnvironmentAPIRouter() router.APIRouter {
 
 type environmentRouter struct{}
 
+func (h *environmentRouter) create(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (h *environmentRouter) delete(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -43,8 +47,12 @@ func (h *environmentRouter) Prefix() string {
 func (h *environmentRouter) Routes() *chi.Mux {
 	router := chi.NewRouter()
 
-	router.Get("/", h.list)
-	router.Get()
+	router.Route("/", func(r chi.Router) {
+		r.Get("/", h.list)
+		r.Get("/{id}", h.get)
+		r.Delete("/{id}", h.delete)
+		r.Put("/", h.create)
+	})
 
 	return router
 }
