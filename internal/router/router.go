@@ -53,17 +53,19 @@ func (rb routerBuilder) New() *chi.Mux {
 	//
 	router.Route("/api", func(r chi.Router) {
 		for _, ar := range rb.apiRouters {
-			r.Use(rb.apiVersionCtx(
-				fmt.Sprintf(
-					"v%d",
-					ar.Version())))
-			r.Mount(
-				fmt.Sprintf(
+			r.Group(func(r chi.Router) {
+				r.Use(rb.apiVersionCtx(
+					fmt.Sprintf(
+						"v%d",
+						ar.Version())))
+
+				prefix := fmt.Sprintf(
 					"/v%d/%s",
 					ar.Version(),
 					ar.Prefix(),
-				),
-				ar.Routes())
+				)
+				ar.Routes(prefix, r)
+			})
 		}
 	})
 

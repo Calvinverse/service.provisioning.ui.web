@@ -29,6 +29,7 @@ type healthRouter struct{}
 // Ping godoc
 // @Summary Respond to a ping request
 // @Description Respond to a ping request with information about the application.
+// @Tags health
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} health.PingResponse
@@ -51,12 +52,8 @@ func (h *healthRouter) Prefix() string {
 }
 
 // Routes creates the routes for the health package
-func (h *healthRouter) Routes() *chi.Mux {
-	router := chi.NewRouter()
-
-	router.Get("/ping", h.ping)
-
-	return router
+func (h *healthRouter) Routes(prefix string, r chi.Router) {
+	r.Get(fmt.Sprintf("%s/ping", prefix), h.ping)
 }
 
 func (h *healthRouter) Version() int8 {

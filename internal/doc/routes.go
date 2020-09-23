@@ -28,8 +28,7 @@ func (d *docRouter) Prefix() string {
 	return "doc"
 }
 
-// Routes creates the routes for the doc package
-func (d *docRouter) Routes() *chi.Mux {
+func (d *docRouter) Routes(prefix string, r chi.Router) {
 	filesDir := ""
 	if d.cfg.IsSet("doc.path") {
 		filesDir = d.cfg.GetString("doc.path")
@@ -51,14 +50,9 @@ func (d *docRouter) Routes() *chi.Mux {
 			"Using doc directory %s",
 			filesDir))
 
-	router := chi.NewRouter()
-
-	// Load the index.html
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filesDir+"/openapi.json")
+	r.Get(prefix, func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filesDir+"/swagger.json")
 	})
-
-	return router
 }
 
 func (d *docRouter) Version() int8 {

@@ -44,17 +44,13 @@ func (h *environmentRouter) Prefix() string {
 }
 
 // Routes creates the routes for the health package
-func (h *environmentRouter) Routes() *chi.Mux {
-	router := chi.NewRouter()
-
-	router.Route("/", func(r chi.Router) {
+func (h *environmentRouter) Routes(prefix string, r chi.Router) {
+	r.Route(prefix, func(r chi.Router) {
 		r.Get("/", h.list)
 		r.Get("/{id}", h.get)
 		r.Delete("/{id}", h.delete)
 		r.Put("/", h.create)
 	})
-
-	return router
 }
 
 func (h *environmentRouter) Version() int8 {
