@@ -53,7 +53,7 @@ function Invoke-Npm
             throw "NPM run lint failed with exit code: $LASTEXITCODE"
         }
 
-        npm run build
+        npm run build:dev
         if ($LASTEXITCODE -ne 0)
         {
             throw "NPM run build failed with exit code: $LASTEXITCODE"
