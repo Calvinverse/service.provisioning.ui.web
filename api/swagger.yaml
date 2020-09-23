@@ -1,5 +1,7 @@
 basePath: /api/v1
 definitions:
+  environment.Environment:
+    type: object
   health.PingResponse:
     properties:
       buildtime:
@@ -17,14 +19,142 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a sample server celler server.
+  description: Provides information about deployed environments and the templates
+    used to created these environments.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+  title: Service.Provisioning server API
   version: "1.0"
 paths:
+  /api/v1/doc:
+    get:
+      consumes:
+      - application/json
+      description: Returns the OpenAPI document for the current service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/environment.Environment'
+      summary: Returns the OpenAPI document for the current service
+      tags:
+      - doc
+  /api/v1/environment:
+    put:
+      consumes:
+      - application/json
+      description: Creates a new environment based on the provided information.
+      parameters:
+      - description: Environment ID
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/environment.Environment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/environment.Environment'
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Creates a new environment.
+      tags:
+      - environment
+  /api/v1/environment/:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of known environment IDs.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Provide the list of known environment IDs
+      tags:
+      - environment
+  /api/v1/environment/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the environment with the given id.
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/environment.Environment'
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Deletes an environment.
+      tags:
+      - environment
+    get:
+      consumes:
+      - application/json
+      description: Returns information about the environment with the given id.
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/environment.Environment'
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Provide information about an environment.
+      tags:
+      - environment
   /api/v1/self/ping:
     get:
       consumes:
@@ -38,6 +168,8 @@ paths:
           schema:
             $ref: '#/definitions/health.PingResponse'
       summary: Respond to a ping request
+      tags:
+      - health
 securityDefinitions:
   ApiKeyAuth:
     in: header
