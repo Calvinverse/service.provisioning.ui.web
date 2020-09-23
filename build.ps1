@@ -145,7 +145,7 @@ function New-LocalBuild
 
     Copy-Item -Path (Join-Path $PSScriptRoot "configs" "*") -Destination $absoluteOutputDir -Force
 
-    & swag init --parseInternal --generatedTime --output ./api --generalInfo ./internal/cmd/server.go
+    & swag init --parseInternal --output ./api --generalInfo ./internal/cmd/server.go
 
     $docDirectory = Join-Path $absoluteOutputDir 'api'
     if (-not (Test-Path $docDirectory))

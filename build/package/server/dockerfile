@@ -20,7 +20,7 @@ COPY cmd/ ./cmd
 RUN go mod download
 
 RUN go get github.com/swaggo/swag/cmd/swag && \
-  swag init --parseInternal --generatedTime --output ./api --generalInfo ./internal/cmd/server.go
+  swag init --parseInternal --output ./api --generalInfo ./internal/cmd/server.go
 
 RUN CGO_ENABLED=0\
   GOOS=linux\
