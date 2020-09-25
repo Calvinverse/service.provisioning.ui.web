@@ -19,6 +19,11 @@ const routes: Array<RouteConfig> = [
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   },
   {
+    path: '/documentation',
+    name: 'DocumentationApi',
+    component: () => import('../views/OpenApi.vue')
+  },
+  {
     path: '*',
     component: () => import('../views/NotFound.vue')
   }
