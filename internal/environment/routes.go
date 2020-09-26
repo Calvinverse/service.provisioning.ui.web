@@ -32,7 +32,7 @@ type environmentRouter struct{}
 // @Success 201 {object} environment.Environment
 // @Failure 404 {object} int
 // @Failure 500 {object} int
-// @Router /api/v1/environment [put]
+// @Router /v1/environment [put]
 func (h *environmentRouter) create(w http.ResponseWriter, r *http.Request) {
 	//render.Status()
 }
@@ -47,7 +47,7 @@ func (h *environmentRouter) create(w http.ResponseWriter, r *http.Request) {
 // @Success 202 {object} environment.Environment
 // @Failure 404 {object} int
 // @Failure 500 {object} int
-// @Router /api/v1/environment/{id} [delete]
+// @Router /v1/environment/{id} [delete]
 func (h *environmentRouter) delete(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -62,7 +62,7 @@ func (h *environmentRouter) delete(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} environment.Environment
 // @Failure 404 {object} int
 // @Failure 500 {object} int
-// @Router /api/v1/environment/{id} [get]
+// @Router /v1/environment/{id} [get]
 func (h *environmentRouter) get(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -76,7 +76,7 @@ func (h *environmentRouter) get(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} string
 // @Failure 404 {object} int
 // @Failure 500 {object} int
-// @Router /api/v1/environment/ [get]
+// @Router /v1/environment/ [get]
 func (h *environmentRouter) list(w http.ResponseWriter, r *http.Request) {
 
 }

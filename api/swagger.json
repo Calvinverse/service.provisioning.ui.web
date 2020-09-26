@@ -16,9 +16,9 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api/v1",
+    "basePath": "/api",
     "paths": {
-        "/api/v1/doc": {
+        "/v1/doc": {
             "get": {
                 "description": "Returns the OpenAPI document for the current service",
                 "consumes": [
@@ -41,7 +41,7 @@
                 }
             }
         },
-        "/api/v1/environment": {
+        "/v1/environment": {
             "put": {
                 "description": "Creates a new environment based on the provided information.",
                 "consumes": [
@@ -87,7 +87,7 @@
                 }
             }
         },
-        "/api/v1/environment/": {
+        "/v1/environment/": {
             "get": {
                 "description": "Returns a list of known environment IDs.",
                 "consumes": [
@@ -125,7 +125,7 @@
                 }
             }
         },
-        "/api/v1/environment/{id}": {
+        "/v1/environment/{id}": {
             "get": {
                 "description": "Returns information about the environment with the given id.",
                 "consumes": [
@@ -211,7 +211,7 @@
                 }
             }
         },
-        "/api/v1/self/ping": {
+        "/v1/self/ping": {
             "get": {
                 "description": "Respond to a ping request with information about the application.",
                 "consumes": [

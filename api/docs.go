@@ -33,7 +33,7 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/doc": {
+        "/v1/doc": {
             "get": {
                 "description": "Returns the OpenAPI document for the current service",
                 "consumes": [
@@ -56,7 +56,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/environment": {
+        "/v1/environment": {
             "put": {
                 "description": "Creates a new environment based on the provided information.",
                 "consumes": [
@@ -102,7 +102,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/environment/": {
+        "/v1/environment/": {
             "get": {
                 "description": "Returns a list of known environment IDs.",
                 "consumes": [
@@ -140,7 +140,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/environment/{id}": {
+        "/v1/environment/{id}": {
             "get": {
                 "description": "Returns information about the environment with the given id.",
                 "consumes": [
@@ -226,7 +226,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/self/ping": {
+        "/v1/self/ping": {
             "get": {
                 "description": "Respond to a ping request with information about the application.",
                 "consumes": [
@@ -334,7 +334,7 @@ type swaggerInfo struct {
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
 	Host:        "localhost:8080",
-	BasePath:    "/api/v1",
+	BasePath:    "/api",
 	Schemes:     []string{},
 	Title:       "Service.Provisioning server API",
 	Description: "Provides information about deployed environments and the templates used to created these environments.",

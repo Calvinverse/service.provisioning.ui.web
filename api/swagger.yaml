@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /api
 definitions:
   environment.Environment:
     type: object
@@ -28,7 +28,7 @@ info:
   title: Service.Provisioning server API
   version: "1.0"
 paths:
-  /api/v1/doc:
+  /v1/doc:
     get:
       consumes:
       - application/json
@@ -43,7 +43,7 @@ paths:
       summary: Returns the OpenAPI document for the current service
       tags:
       - doc
-  /api/v1/environment:
+  /v1/environment:
     put:
       consumes:
       - application/json
@@ -73,7 +73,7 @@ paths:
       summary: Creates a new environment.
       tags:
       - environment
-  /api/v1/environment/:
+  /v1/environment/:
     get:
       consumes:
       - application/json
@@ -98,7 +98,7 @@ paths:
       summary: Provide the list of known environment IDs
       tags:
       - environment
-  /api/v1/environment/{id}:
+  /v1/environment/{id}:
     delete:
       consumes:
       - application/json
@@ -155,7 +155,7 @@ paths:
       summary: Provide information about an environment.
       tags:
       - environment
-  /api/v1/self/ping:
+  /v1/self/ping:
     get:
       consumes:
       - application/json

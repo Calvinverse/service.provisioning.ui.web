@@ -33,7 +33,7 @@ type healthRouter struct{}
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} health.PingResponse
-// @Router /api/v1/self/ping [get]
+// @Router /v1/self/ping [get]
 func (h *healthRouter) ping(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 

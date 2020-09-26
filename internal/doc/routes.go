@@ -35,7 +35,7 @@ func (d *docRouter) Prefix() string {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} environment.Environment
-// @Router /api/v1/doc [get]
+// @Router /v1/doc [get]
 func (d *docRouter) Routes(prefix string, r chi.Router) {
 	filesDir := ""
 	if d.cfg.IsSet("doc.path") {
