@@ -11,6 +11,13 @@ import (
 	"github.com/go-chi/render"
 )
 
+// InfoResponse stores the response to an info request
+type InfoResponse struct {
+	BuildTime string `json:"buildtime"`
+	Revision  string `json:"revision"`
+	Version   string `json:"version"`
+}
+
 // PingResponse stores the response to a Ping request
 type PingResponse struct {
 	BuildTime string `json:"buildtime"`
@@ -25,6 +32,24 @@ func NewHealthAPIRouter() router.APIRouter {
 }
 
 type healthRouter struct{}
+
+// Info godoc
+// @Summary Respond to an info request
+// @Description Respond to an info request with information about the application.
+// @Tags health
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} health.InfoResponse
+// @Router /v1/self/info [get]
+func (h *healthRouter) info(w http.ResponseWriter, r *http.Request) {
+	response := InfoResponse{
+		BuildTime: info.BuildTime(),
+		Revision:  info.Revision(),
+		Version:   info.Version(),
+	}
+
+	render.JSON(w, r, response)
+}
 
 // Ping godoc
 // @Summary Respond to a ping request
@@ -54,6 +79,7 @@ func (h *healthRouter) Prefix() string {
 // Routes creates the routes for the health package
 func (h *healthRouter) Routes(prefix string, r chi.Router) {
 	r.Get(fmt.Sprintf("%s/ping", prefix), h.ping)
+	r.Get(fmt.Sprintf("%s/info", prefix), h.info)
 }
 
 func (h *healthRouter) Version() int8 {

@@ -2,6 +2,15 @@ basePath: /api
 definitions:
   environment.Environment:
     type: object
+  health.InfoResponse:
+    properties:
+      buildtime:
+        type: string
+      revision:
+        type: string
+      version:
+        type: string
+    type: object
   health.PingResponse:
     properties:
       buildtime:
@@ -155,6 +164,21 @@ paths:
       summary: Provide information about an environment.
       tags:
       - environment
+  /v1/self/info:
+    get:
+      consumes:
+      - application/json
+      description: Respond to an info request with information about the application.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/health.InfoResponse'
+      summary: Respond to an info request
+      tags:
+      - health
   /v1/self/ping:
     get:
       consumes:

@@ -44,16 +44,69 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Component, Vue } from 'vue-property-decorator'
+import ServiceInformationService from './services/ServiceInformationService'
 
-export default Vue.extend({
-  name: 'App',
+export class ServiceInfo {
+  public buildtime: Date
+  public revision: string
+  public version: string
+
+  constructor (
+    bt: Date,
+    r: string,
+    v: string
+  ) {
+    this.buildtime = bt
+    this.revision = r
+    this.version = v
+  }
+}
+
+@Component
+export default class App extends Vue {
+  private serviceInfo: ServiceInfo = new ServiceInfo(
+    new Date('1900-01-01 01:01:01'),
+    '123456789abcdef',
+    '0.0.0'
+  )
 
   components: {
   },
 
-  data: () => ({
-    //
+  getServiceInfo () {
+    ServiceInformationService.get()
+      .then((response) => {
+        this.serviceInfo = new ServiceInfo(
+          new Date(response.data.buildtime),
+          response.data.revision,
+          response.data.version
+        )
+        console.log(response.data)
   })
+      .catch(function (error) {
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.log(error.response.data)
+          console.log(error.response.status)
+          console.log(error.response.headers)
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          console.log(error.request)
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.log('Error', error.message)
+        }
+        console.log(error.config)
 })
+  }
+
+  mounted () {
+    console.log('Loading service info ...')
+    this.getServiceInfo()
+  }
+}
 </script>

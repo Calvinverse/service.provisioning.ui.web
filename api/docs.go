@@ -226,6 +226,29 @@ var doc = `{
                 }
             }
         },
+        "/v1/self/info": {
+            "get": {
+                "description": "Respond to an info request with information about the application.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Respond to an info request",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/health.InfoResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/self/ping": {
             "get": {
                 "description": "Respond to a ping request with information about the application.",
@@ -253,6 +276,20 @@ var doc = `{
     "definitions": {
         "environment.Environment": {
             "type": "object"
+        },
+        "health.InfoResponse": {
+            "type": "object",
+            "properties": {
+                "buildtime": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
         },
         "health.PingResponse": {
             "type": "object",
