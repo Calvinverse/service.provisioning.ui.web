@@ -1,61 +1,174 @@
 <template>
-  <v-app>
+  <v-app
+    id="main"
+    :style="{background: $vuetify.theme.themes.dark.background}">
     <v-app-bar
+      absolute
       app
       color="primary"
-      dark
+      prominent
     >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+      <v-container
+        fluid>
+        <v-row
+          align="vertical"
+          >
+          <v-col
+            cols="1">
+            <v-img
+              alt="Vuetify Logo"
+              class="shrink mr-2"
+              contain
+              :src="require('./assets/logo-white.png')"
+              transition="scale-transition"
+              width="80"
+            />
+          </v-col>
+          <v-col>
+            <h1>
+              Environments
+            </h1>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col
+          cols="2">
+          <v-card>
+            <v-list
+                  color="secondary"
+                  nav
+                >
+              <v-list-item
+                two-line>
+                <v-list-item-avatar>
+                  <img src="https://randomuser.me/api/portraits/men/81.jpg">
+                </v-list-item-avatar>
 
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+                <v-list-item-content>
+                  <v-list-item-title>User name</v-list-item-title>
+                  <v-list-item-subtitle>Subtext</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-col>
+        </v-row>
+      </v-container>
     </v-app-bar>
 
-    <v-content>
-      <HelloWorld/>
-    </v-content>
+    <v-main>
+      <router-view></router-view>
+    </v-main>
+
+    <v-footer
+      color="primary darken-2"
+      padless
+    >
+      <v-row
+        justify="center"
+        no-gutters
+      >
+        <v-btn
+          v-for="link in data.footerItems"
+          :key="link.title"
+          color="white"
+          rounded
+          class="my-2"
+          :to="link.href"
+          text
+        >
+          {{ link.title }}
+        </v-btn>
+        <v-col
+          class="primary darken-4 py-4 text-center white--text"
+          cols="12"
+        >
+          <strong>Build on: </strong>{{ serviceInfo.buildtime }} — <strong>Version: </strong>{{ serviceInfo.version}}
+        </v-col>
+      </v-row>
+    </v-footer>
   </v-app>
+
+  <!--
+    Footer:
+
+    icon: categories by Marie Van den Broeck from the Noun Project
+
+  -->
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+import { Component, Vue } from 'vue-property-decorator'
+import ServiceInformationService from './services/ServiceInformationService'
 
-export default Vue.extend({
-  name: 'App',
+export class ServiceInfo {
+  public buildtime: Date
+  public revision: string
+  public version: string
 
-  components: {
-    HelloWorld
-  },
+  constructor (
+    bt: Date,
+    r: string,
+    v: string
+  ) {
+    this.buildtime = bt
+    this.revision = r
+    this.version = v
+  }
+}
 
-  data: () => ({
-    //
-  })
-})
+@Component
+export default class App extends Vue {
+  private serviceInfo: ServiceInfo = new ServiceInfo(
+    new Date('1900-01-01 01:01:01'),
+    '123456789abcdef',
+    '0.0.0'
+  )
+
+  private data: any = {
+    footerItems: [
+      { title: 'Home', href: '/' },
+      { title: 'About Us', href: '/about' }
+    ],
+    menuItems: [
+      { title: 'Dashboard', icon: 'mdi-view-dashboard' },
+      { title: 'Photos', icon: 'mdi-image' },
+      { title: 'About', icon: 'mdi-help-box' }
+    ]
+  }
+
+  getServiceInfo () {
+    ServiceInformationService.get()
+      .then((response) => {
+        this.serviceInfo = new ServiceInfo(
+          new Date(response.data.buildtime),
+          response.data.revision,
+          response.data.version
+        )
+        console.log(response.data)
+      })
+      .catch(function (error) {
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.log(error.response.data)
+          console.log(error.response.status)
+          console.log(error.response.headers)
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          console.log(error.request)
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.log('Error', error.message)
+        }
+        console.log(error.config)
+      })
+  }
+
+  mounted () {
+    console.log('Loading service info ...')
+    this.getServiceInfo()
+  }
+}
 </script>

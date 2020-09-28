@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/calvinverse/service.provisioning/internal/info"
+	"github.com/go-chi/chi"
 )
 
 func TestRoutes(t *testing.T) {
@@ -15,7 +16,12 @@ func TestRoutes(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	instance := &healthRouter{}
-	router := instance.Routes()
+
+	router := chi.NewRouter()
+	router.Route("/", func(r chi.Router) {
+		instance.Routes("", r)
+	})
+
 	router.ServeHTTP(w, request)
 
 	actualResult := PingResponse{}

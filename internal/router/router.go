@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
 	"github.com/sirupsen/logrus"
 )
@@ -17,7 +18,9 @@ type Builder interface {
 }
 
 // NewRouterBuilder creates a new instance of the Builder interface.
-func NewRouterBuilder(apiRouters []APIRouter, webRouter WebRouter) Builder {
+func NewRouterBuilder(
+	apiRouters []APIRouter,
+	webRouter WebRouter) Builder {
 	return &routerBuilder{
 		apiRouters: apiRouters,
 		webRouter:  webRouter,
@@ -51,17 +54,19 @@ func (rb routerBuilder) New() *chi.Mux {
 	//
 	router.Route("/api", func(r chi.Router) {
 		for _, ar := range rb.apiRouters {
-			r.Use(rb.apiVersionCtx(
-				fmt.Sprintf(
-					"v%d",
-					ar.Version())))
-			r.Mount(
-				fmt.Sprintf(
+			r.Group(func(r chi.Router) {
+				r.Use(rb.apiVersionCtx(
+					fmt.Sprintf(
+						"v%d",
+						ar.Version())))
+
+				prefix := fmt.Sprintf(
 					"/v%d/%s",
 					ar.Version(),
 					ar.Prefix(),
-				),
-				ar.Routes())
+				)
+				ar.Routes(prefix, r)
+			})
 		}
 	})
 
@@ -81,6 +86,19 @@ func (rb routerBuilder) newChiRouter(logger *logrus.Logger) *chi.Mux {
 	router.Use(rb.newStructuredLogger(logger))
 
 	router.Use(render.SetContentType(render.ContentTypeJSON))
+
+	// Basic CORS
+	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+	router.Use(cors.Handler(cors.Options{
+		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
 	return router
 }

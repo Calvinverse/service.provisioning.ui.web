@@ -10,7 +10,7 @@ type APIRouter interface {
 	Prefix() string
 
 	/// Routes provides the different routes for this APIRouter
-	Routes() *chi.Mux
+	Routes(prefix string, r chi.Router)
 
 	// Version returns the API version for the routes.
 	Version() int8

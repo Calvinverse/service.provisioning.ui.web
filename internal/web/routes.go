@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -31,6 +32,12 @@ func (w *webRouter) Routes(r *chi.Mux, rootRouter func() chi.Router) {
 	filesDir := ""
 	if w.cfg.IsSet("ui.path") {
 		filesDir = w.cfg.GetString("ui.path")
+		if _, err := os.Stat(filesDir); os.IsNotExist(err) {
+			panic(
+				fmt.Sprintf(
+					"UI directory does not exist.Configuration was set to: %s",
+					filesDir))
+		}
 	} else {
 		ex, err := os.Executable()
 		if err != nil {
@@ -58,29 +65,35 @@ func (w *webRouter) Routes(r *chi.Mux, rootRouter func() chi.Router) {
 		http.ServeFile(w, r, filesDir+"/favicon.ico")
 	})
 
-	w.fileServer(r, "/css", http.Dir(filesDir+"/css"))
-	w.fileServer(r, "/img", http.Dir(filesDir+"/img"))
-	w.fileServer(r, "/js", http.Dir(filesDir+"/js"))
-
-	r.Mount("/", rootRouter())
+	w.fileServer(r, "/css", filesDir+"/css")
+	w.fileServer(r, "/img", filesDir+"/img")
+	w.fileServer(r, "/js", filesDir+"/js")
+	w.fileServer(r, "/", filesDir)
 }
 
-func (w *webRouter) fileServer(r chi.Router, path string, root http.FileSystem) {
-	if strings.ContainsAny(path, "{}*") {
+func (w *webRouter) fileServer(r chi.Router, urlPath string, basePath string) {
+	if strings.ContainsAny(urlPath, "{}*") {
 		panic("FileServer does not permit any URL parameters")
 	}
 
-	if path != "/" && path[len(path)-1] != '/' {
-		destination := path + "/"
-		r.Get(path, http.RedirectHandler(destination, 301).ServeHTTP)
-		path += "/"
+	root, _ := filepath.Abs(basePath)
+	if _, err := os.Stat(root); os.IsNotExist(err) {
+		panic("Static Documents Directory Not Found")
 	}
-	path += "*"
 
-	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
-		rctx := chi.RouteContext(r.Context())
-		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
-		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+	fs := http.StripPrefix(urlPath, http.FileServer(http.Dir(root)))
+
+	if urlPath != "/" && urlPath[len(urlPath)-1] != '/' {
+		r.Get(urlPath, http.RedirectHandler(urlPath+"/", 301).ServeHTTP)
+		urlPath += "/"
+	}
+
+	r.Get(urlPath+"*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		file := strings.Replace(r.RequestURI, urlPath, "/", 1)
+		if _, err := os.Stat(root + file); os.IsNotExist(err) {
+			http.ServeFile(w, r, path.Join(root, "index.html"))
+			return
+		}
 		fs.ServeHTTP(w, r)
-	})
+	}))
 }

@@ -1,3 +1,36 @@
+## API methods
+
+* List running environments
+* Create environment
+* Delete environment
+* Get environment -> link to consul etc.
+* List templates
+* Get template
+* Delete template
+* Import environment(?)
+* Update environment
+* Update template
+
+## To do
+
+* Connect to consul
+  * K / V
+  * Connect
+  * Service registration
+* Vault for secrets + login
+* User login
+* Tracing
+* Metrics
+* Logs
+* Api Docs
+
+* IoC
+* unit tests
+* integration tests
+* Http resiliency
+
+
+
 ## Backend
 
 ### Naming

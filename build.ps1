@@ -53,7 +53,7 @@ function Invoke-Npm
             throw "NPM run lint failed with exit code: $LASTEXITCODE"
         }
 
-        npm run build
+        npm run build:dev
         if ($LASTEXITCODE -ne 0)
         {
             throw "NPM run build failed with exit code: $LASTEXITCODE"
@@ -145,12 +145,25 @@ function New-LocalBuild
 
     Copy-Item -Path (Join-Path $PSScriptRoot "configs" "*") -Destination $absoluteOutputDir -Force
 
+    & swag init --parseInternal --output ./api --generalInfo ./internal/cmd/server.go
+
+    $docDirectory = Join-Path $absoluteOutputDir 'api'
+    if (-not (Test-Path $docDirectory))
+    {
+        New-Item -Path $docDirectory -ItemType Directory | Out-Null
+    }
+
+    Copy-Item -Path (Join-Path $PSScriptRoot 'api' '*') -Destination $docDirectory -Force
+
     $configPath = Join-Path $absoluteOutputDir 'config.yaml'
-    Add-Content -Path $configPath -Value 'ui:'
-    Add-Content -Path $configPath -Value "  path: $clientDirectory"
+    Add-Content -Path $configPath -Value 'doc:'
+    Add-Content -Path $configPath -Value "  path: $docDirectory"
 
     Add-Content -Path $configPath -Value 'service:'
     Add-Content -Path $configPath -Value '  port: 8080'
+
+    Add-Content -Path $configPath -Value 'ui:'
+    Add-Content -Path $configPath -Value "  path: $clientDirectory"
 
     go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning/internal/info.version=$version" -o $outputDir/server.exe ./cmd
 
@@ -158,15 +171,22 @@ function New-LocalBuild
 }
 
 $revision = Get-Revision
+Write-Output "Using revision: '$revision'"
+
 $version = Get-Version
-$date = Get-Date -UFormat '%Y-%m-%d_%T'
+Write-Output "Using version: '$version'"
+
+$date = Get-Date -UFormat '%Y-%m-%dT%T'
+Write-Output "Using date: '$date'"
 
 if ($Direct)
 {
+    Write-Output "Building container ..."
     New-LocalBuild -date $date -sha1 $revision -version $version
 }
 else
 {
+    Write-Output "Building locally ..."
     New-Container -date $date -sha1 $revision -version $version -dockerTags $($dockerTags.Split(','))
 }
 
