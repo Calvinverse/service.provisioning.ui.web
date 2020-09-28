@@ -171,15 +171,22 @@ function New-LocalBuild
 }
 
 $revision = Get-Revision
+Write-Output "Using revision: '$revision'"
+
 $version = Get-Version
-$date = Get-Date -UFormat '%Y-%m-%d_%T'
+Write-Output "Using version: '$version'"
+
+$date = Get-Date -UFormat '%Y-%m-%dT%T'
+Write-Output "Using date: '$date'"
 
 if ($Direct)
 {
+    Write-Output "Building container ..."
     New-LocalBuild -date $date -sha1 $revision -version $version
 }
 else
 {
+    Write-Output "Building locally ..."
     New-Container -date $date -sha1 $revision -version $version -dockerTags $($dockerTags.Split(','))
 }
 
