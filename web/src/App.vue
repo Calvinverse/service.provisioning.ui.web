@@ -32,24 +32,7 @@
           <v-spacer></v-spacer>
           <v-col
           cols="2">
-          <v-card>
-            <v-list
-                  color="secondary"
-                  nav
-                >
-              <v-list-item
-                two-line>
-                <v-list-item-avatar>
-                  <img src="https://randomuser.me/api/portraits/men/81.jpg">
-                </v-list-item-avatar>
-
-                <v-list-item-content>
-                  <v-list-item-title>User name</v-list-item-title>
-                  <v-list-item-subtitle>Subtext</v-list-item-subtitle>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-card>
+            <UserLoginState />
         </v-col>
         </v-row>
       </v-container>
