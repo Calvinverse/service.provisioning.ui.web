@@ -81,7 +81,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import ServiceInformationService from './services/ServiceInformationService'
+import { ServiceInformationService } from './services/ServiceInformationService'
+import UserLoginState from './components/UserLoginState.vue'
 
 export class ServiceInfo {
   public buildtime: Date
@@ -99,7 +100,12 @@ export class ServiceInfo {
   }
 }
 
-@Component
+@Component({
+  components: {
+    UserLoginState
+  }
+})
+
 export default class App extends Vue {
   private serviceInfo: ServiceInfo = new ServiceInfo(
     new Date('1900-01-01 01:01:01'),
@@ -120,7 +126,7 @@ export default class App extends Vue {
   }
 
   getServiceInfo () {
-    ServiceInformationService.get()
+    (new ServiceInformationService()).get()
       .then((response) => {
         this.serviceInfo = new ServiceInfo(
           new Date(response.data.buildtime),

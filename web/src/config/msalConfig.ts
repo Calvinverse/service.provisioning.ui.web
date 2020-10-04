@@ -1,11 +1,7 @@
-import http from '../http-commons'
-
-class MsalConfig {
-  clientID: string = '15fa3344-bbaf-4cae-8e69-2279803b4ba4'
-  redirectUrl: URL = new URL(window.location.origin)
-  authority: URL = new URL('https://login.microsoftonline.com/common')
-  graphScopes: string[] = ['user.read']
+export class MsalConfig {
+  clientID = '3a287c7c-6b20-4118-9c4f-1f8b8bb622e7'
+  redirectUrl: URL = new URL('http://localhost:8080')
+  authority = 'https://calvinverse.b2clogin.com/calvinverse.onmicrosoft.com/B2C_1_user_signin_signup'
+  scopes: string[] = ['openid', 'profile']
   graphEndpoint: URL = new URL('https://graph.microsoft.com/v1.0/me')
 }
-
-export default new MsalConfig()

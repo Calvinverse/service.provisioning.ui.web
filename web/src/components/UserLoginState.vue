@@ -2,9 +2,9 @@
   <v-container>
     <!-- Anonymous -->
     <v-menu
-      top
-      :offset-y="offset"
-      v-if="!user"
+      bottom
+      offset-y
+      v-if="!profile.isAuthenticated"
       >
 
       <template v-slot:activator="{ on, attrs }" >
@@ -25,9 +25,9 @@
 
     <!-- Authenticated -->
     <v-menu
-      top
-      :offset-y="offset"
-      v-if="user"
+      bottom
+      offset-y
+      v-if="profile.isAuthenticated"
       >
       <template v-slot:activator="{ on, attrs }">
         <v-btn
@@ -35,10 +35,10 @@
           v-bind="attrs"
           v-on="on"
         >
-          <strong>{{ user.name }}</strong>
+          <strong>{{ fullName }}</strong>
         </v-btn>
       </template>
-      <v-list v-if="user">
+      <v-list v-if="profile.isAuthenticated">
         <v-list-item>
           <v-list-item-title>
             <strong>Account</strong>
@@ -61,28 +61,30 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import Vue from 'vue'
+import {
+  namespace,
+  State
+} from 'vuex-class'
+import Component from 'vue-class-component'
+import { ProfileState } from '../store/profile/ProfileState'
+import { profile } from '../store/profile'
+
+const profileModule = namespace('profile')
 
 @Component
 export default class UserLoginState extends Vue {
-  user: null
+  @State('profile') profile!: ProfileState
+  @profileModule.Action('login') login: any
+  @profileModule.Action('logout') logout: any
+  @profileModule.Getter('fullName') fullName!: string
 
-  mounted() {
+  mounted () {
     this.setUser()
   }
 
-  logout() {
-    this.user = null
-    this.$AuthService.logout()
-  }
-
-  login() {
-    // this.$AuthService.loginPopup() //with a popup
-    this.$AuthService.loginRedirect() //with a redirect
-  }
-
-  setUser() {
-    this.user = this.$AuthService.getUser()
+  setUser () {
+    // this.user = this.$AuthService.getUser()
   }
 }
 </script>
