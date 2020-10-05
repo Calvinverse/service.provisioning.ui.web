@@ -83,7 +83,7 @@ function Invoke-Npm
         New-Item -Path $clientDirectory -ItemType Directory | Out-Null
     }
 
-    Get-ChildItem -Path (Join-Path $PSScriptRoot 'web' 'dist')  | Copy-Item -Destination $clientDirectory -Recurse -Container
+    Get-ChildItem -Path (Join-Path $PSScriptRoot 'web' 'dist')  | Copy-Item -Destination $clientDirectory -Recurse -Container -Force
 }
 
 function New-Container
