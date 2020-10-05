@@ -9,12 +9,15 @@
       prominent
     >
       <v-container
+        fill-height
         fluid>
         <v-row
           align="vertical"
+          class="fill-height"
           >
           <v-col
-            cols="1">
+            cols="1"
+            class="fill-height">
             <v-img
               alt="Vuetify Logo"
               class="shrink mr-2"
@@ -24,32 +27,17 @@
               width="80"
             />
           </v-col>
-          <v-col>
+          <v-col
+            class="fill-height">
             <h1>
               Environments
             </h1>
           </v-col>
           <v-spacer></v-spacer>
           <v-col
-          cols="2">
-          <v-card>
-            <v-list
-                  color="secondary"
-                  nav
-                >
-              <v-list-item
-                two-line>
-                <v-list-item-avatar>
-                  <img src="https://randomuser.me/api/portraits/men/81.jpg">
-                </v-list-item-avatar>
-
-                <v-list-item-content>
-                  <v-list-item-title>User name</v-list-item-title>
-                  <v-list-item-subtitle>Subtext</v-list-item-subtitle>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-card>
+          cols="3"
+          class="fill-height">
+            <UserCard />
         </v-col>
         </v-row>
       </v-container>
@@ -98,7 +86,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import ServiceInformationService from './services/ServiceInformationService'
+import { ServiceInformationService } from './services/ServiceInformationService'
+import UserCard from './components/UserCard.vue'
 
 export class ServiceInfo {
   public buildtime: Date
@@ -116,7 +105,12 @@ export class ServiceInfo {
   }
 }
 
-@Component
+@Component({
+  components: {
+    UserCard
+  }
+})
+
 export default class App extends Vue {
   private serviceInfo: ServiceInfo = new ServiceInfo(
     new Date('1900-01-01 01:01:01'),
@@ -137,7 +131,7 @@ export default class App extends Vue {
   }
 
   getServiceInfo () {
-    ServiceInformationService.get()
+    (new ServiceInformationService()).get()
       .then((response) => {
         this.serviceInfo = new ServiceInfo(
           new Date(response.data.buildtime),
