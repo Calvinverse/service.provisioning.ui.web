@@ -1,7 +1,7 @@
 import { Account } from 'msal'
 
 export interface ProfileState {
-  user?: Account
-  error: boolean
-  isAuthenticated: boolean
+  user?: Account;
+  error: boolean;
+  isAuthenticated: boolean;
 }

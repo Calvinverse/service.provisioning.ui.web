@@ -9,12 +9,15 @@
       prominent
     >
       <v-container
+        fill-height
         fluid>
         <v-row
           align="vertical"
+          class="fill-height"
           >
           <v-col
-            cols="1">
+            cols="1"
+            class="fill-height">
             <v-img
               alt="Vuetify Logo"
               class="shrink mr-2"
@@ -24,15 +27,17 @@
               width="80"
             />
           </v-col>
-          <v-col>
+          <v-col
+            class="fill-height">
             <h1>
               Environments
             </h1>
           </v-col>
           <v-spacer></v-spacer>
           <v-col
-          cols="2">
-            <UserLoginState />
+          cols="3"
+          class="fill-height">
+            <UserCard />
         </v-col>
         </v-row>
       </v-container>
@@ -82,7 +87,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { ServiceInformationService } from './services/ServiceInformationService'
-import UserLoginState from './components/UserLoginState.vue'
+import UserCard from './components/UserCard.vue'
 
 export class ServiceInfo {
   public buildtime: Date
@@ -102,7 +107,7 @@ export class ServiceInfo {
 
 @Component({
   components: {
-    UserLoginState
+    UserCard
   }
 })
 
