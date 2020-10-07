@@ -2,8 +2,8 @@ import { Module } from 'vuex'
 import { getters } from './getters'
 import { actions } from './actions'
 import { mutations } from './mutations'
-import { ProfileState } from './ProfileState'
-import { RootState } from './RootState'
+import { ProfileState } from './types'
+import { RootState } from '../RootState'
 
 export const state: ProfileState = {
   user: undefined,

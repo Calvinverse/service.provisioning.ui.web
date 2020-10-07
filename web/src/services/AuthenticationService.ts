@@ -1,5 +1,6 @@
 import * as Msal from 'msal'
 
+// This should technically be a singleton because internally it keeps state which isn't linked to vuex or anything
 export class AuthenticationService {
   private app: Msal.UserAgentApplication
   private scopes: string[]

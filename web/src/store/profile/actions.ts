@@ -1,6 +1,6 @@
 import { ActionTree } from 'vuex'
-import { ProfileState } from './ProfileState'
-import { RootState } from './RootState'
+import { ProfileState } from './types'
+import { RootState } from '../RootState'
 import { AuthenticationService } from '../../services/AuthenticationService'
 import { MsalConfig } from '../../config/msalConfig'
 

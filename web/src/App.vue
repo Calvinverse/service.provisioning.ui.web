@@ -121,6 +121,7 @@ export default class App extends Vue {
   private data: any = {
     footerItems: [
       { title: 'Home', href: '/' },
+      { title: 'Documentation', href: '/documentation' },
       { title: 'About Us', href: '/about' }
     ],
     menuItems: [
