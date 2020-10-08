@@ -9,15 +9,17 @@ import {
   State
 } from 'vuex-class'
 import Component from 'vue-class-component'
+import { Environment } from '../store/environment'
 
 const environmentModule = namespace('environment')
 
 @Component
-export default class UserCard extends Vue {
-  @State('profile') profile!: ProfileState
-  @environmentModule.Action('login') login: any
-  @environmentModule.Action('logout') logout: any
-  @environmentModule.Getter('fullName') fullName!: string
-  @environmentModule.Getter('gravatarImage') gravatarImage!: string
+export default class EnvironmentCard extends Vue {
+  @State('environment') environment!: Environment
+  @environmentModule.Action('get') get: any
+  @environmentModule.Action('getAll') getAll: any
+  @environmentModule.Action('delete') delete: any
+  // @environmentModule.Getter('fullName') fullName!: string
+  // @environmentModule.Getter('gravatarImage') gravatarImage!: string
 }
 </script>

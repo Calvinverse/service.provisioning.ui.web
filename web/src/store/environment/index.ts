@@ -4,33 +4,37 @@ import {
   Mutation,
   Action
 } from 'vuex-module-decorators'
-import { Account } from 'msal'
-import {
-  Options,
-  url
-} from 'gravatar'
 import { AuthenticationService } from '../../services/AuthenticationService'
-import { MsalConfig } from '../../config/msalConfig'
 import { EnvironmentService } from '../../services/EnvironmentService'
 
-const environmentService = new EnvironmentService(config.clientID, config.authority, config.scopes)
+const environmentService = new EnvironmentService(AuthenticationService.getInstance())
 
-@Module({ namespaced: true, name: 'environment' })
-class Environment extends VuexModule {
-  error: boolean = false
-  id: string = ''
-  name: string = ''
-  description: string = ''
+export class Environment {
+  id = ''
+  name = ''
+  description = ''
   createdOn: Date = new Date()
   destroyBy: Date = new Date()
-  status: string = ''
-  resources: string[]  = []// ID of resources
+  status = ''
+  resources: string[] = []// ID of resources
   tags: string[] = [] // ID of tags
-  version: string = ''
+  version = ''
+}
+
+@Module({ namespaced: true })
+export class Environments extends VuexModule {
+  error = false
+  private items: Environment[] = []
+
+  // getters
+
+  // Actions
 
   @Action
-  public async get(environmentID: string) {
+  public async get (environmentID: string) {
     console.log('DEBUG: Store login called')
+
+    // If not in the cache then get it
     const user = await environmentService.get(environmentID) // What if error
     this.context.commit('updateUser', user)
     this.context.commit('updateIsAuthenticated', user !== undefined)
@@ -38,7 +42,7 @@ class Environment extends VuexModule {
   }
 
   @Action
-  public async getAll() {
+  public async getAll () {
     console.log('DEBUG: Store login called')
     const user = await environmentService.getAll() // What if error
     this.context.commit('updateUser', user)
@@ -47,9 +51,11 @@ class Environment extends VuexModule {
   }
 
   @Action
-  public async delete() {
-    await environmentService.delete() // What if error
+  public async delete (environmentID: string) {
+    await environmentService.delete(environmentID) // What if error
     this.context.commit('updateUser', {})
     this.context.commit('updateIsAuthenticated', false)
   }
+
+  // Mutations
 }

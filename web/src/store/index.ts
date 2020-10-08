@@ -1,15 +1,15 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import { environment } from './environment/index'
-import profile from './profile/index'
+import { Environments } from './environment/index'
+import Profile from './profile/index'
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   modules: {
-    environment,
-    profile
+    environment: Environments,
+    profile: Profile
   }
 })
 

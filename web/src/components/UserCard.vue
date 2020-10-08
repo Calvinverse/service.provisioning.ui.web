@@ -4,22 +4,23 @@
       origin="center center"
       transition="scale-transition"
       color="secondary"
-      :rounded="b-xl"
-      :offset-y="offset"
+      rounded="b-xl"
+      offset-y
     >
       <template v-slot:activator="{ on, attrs }">
         <v-card
           color="secondary"
           v-bind="attrs"
           v-on="on"
-          height="100%"
+          class="fill-height"
           >
           <v-container
-            fill-height>
+            class="fill-height">
             <v-row
-              >
+              class="fill-height">
               <v-col
-                cols="2">
+                cols="2"
+                class="fill-height">
                 <v-avatar
                   v-if="!profile.isAuthenticated">
                   <v-icon x-large>mdi-account-circle</v-icon>
@@ -31,7 +32,8 @@
                   />
                 </v-avatar>
               </v-col>
-              <v-col>
+              <v-col
+                class="fill-height">
                 <v-card-title>{{ userName }}</v-card-title>
               </v-col>
             </v-row>
@@ -59,13 +61,13 @@ import {
   State
 } from 'vuex-class'
 import Component from 'vue-class-component'
-import { ProfileState } from '../store/profile/ProfileState'
+import Profile from '../store/profile/index'
 
 const profileModule = namespace('profile')
 
 @Component
 export default class UserCard extends Vue {
-  @State('profile') profile!: ProfileState
+  @State('profile') profile!: Profile
   @profileModule.Action('login') login: any
   @profileModule.Action('logout') logout: any
   @profileModule.Getter('fullName') fullName!: string

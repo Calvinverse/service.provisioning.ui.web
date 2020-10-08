@@ -10,16 +10,12 @@ import {
   url
 } from 'gravatar'
 import { AuthenticationService } from '../../services/AuthenticationService'
-import { MsalConfig } from '../../config/msalConfig'
 
-const config = new MsalConfig()
-const authenticationService = new AuthenticationService(config.clientID, config.authority, config.scopes)
-
-@Module({ namespaced: true, name: 'profile' })
+@Module({ namespaced: true })
 class Profile extends VuexModule {
-  user?: Account;
-  error: boolean = false;
-  isAuthenticated: boolean = false;
+  user?: Account
+  error = false
+  isAuthenticated = false
 
   get fullName (): string {
     const user = this.user
@@ -35,19 +31,34 @@ class Profile extends VuexModule {
   }
 
   @Action
-  public async login () {
+  async login () {
     console.log('DEBUG: Store login called')
-    const user = await authenticationService.login() // What if error
-    this.context.commit('updateUser', user)
-    this.context.commit('updateIsAuthenticated', user !== undefined)
-    console.log('DEBUG: Store login complete.') // Should send a message to the UI indicating that login failed
+    const service = AuthenticationService.getInstance()
+    const loginResult = await service.login()
+    if (loginResult) {
+      const user = service.getUser()
+      this.context.commit('updateUser', user)
+      this.context.commit('updateIsAuthenticated', true)
+      this.context.commit('updateError', false)
+      console.log('DEBUG: Store login complete.') // Should send a message to the UI indicating that login failed
+    } else {
+      this.context.commit('updateUser', {})
+      this.context.commit('updateIsAuthenticated', false)
+      this.context.commit('updateError', true)
+    }
   }
 
   @Action
-  public logout () {
-    authenticationService.logout() // What if error
+  logout () {
+    const service = AuthenticationService.getInstance()
+    service.logout() // What if error
     this.context.commit('updateUser', {})
     this.context.commit('updateIsAuthenticated', false)
+  }
+
+  @Mutation
+  updateError (value: boolean) {
+    this.error = value
   }
 
   @Mutation

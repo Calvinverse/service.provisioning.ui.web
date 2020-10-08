@@ -1,5 +1,5 @@
 
-export interface Environment {
+export interface EnvironmentDefinition {
   id: string
   name: string
   description: string
@@ -9,7 +9,7 @@ export interface Environment {
 
   resources: string[]
 
-  tags: Tag[]
+  tags: TagDefinition[]
 
   version: string
 
@@ -18,7 +18,7 @@ export interface Environment {
   destroy(resourceID: string): boolean
 }
 
-export interface Resource {
+export interface ResourceDefinition {
   id: string
 
   name: string
@@ -29,12 +29,12 @@ export interface Resource {
   // ID of the template that was used to create the current resource
   templateId: string
 
-  tags: Tag[]
+  tags: TagDefinition[]
 
   status (): string
 }
 
-export interface Tag {
+export interface TagDefinition {
   name: string
   value: string
 }
