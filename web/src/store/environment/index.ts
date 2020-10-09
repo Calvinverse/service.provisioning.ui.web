@@ -28,6 +28,13 @@ export class Environments extends VuexModule {
 
   // getters
 
+  get environment () {
+    return (environmentID: string) => {
+      const result = this.items.find(x => x.id == environmentID)
+      return result
+    }
+  }
+
   // Actions
 
   @Action
