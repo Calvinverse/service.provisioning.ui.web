@@ -30,7 +30,7 @@ export class Environments extends VuexModule {
 
   get environment () {
     return (environmentID: string) => {
-      const result = this.items.find(x => x.id == environmentID)
+      const result = this.items.find(x => x.id === environmentID)
       return result
     }
   }
