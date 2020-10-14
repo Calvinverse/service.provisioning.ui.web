@@ -35,34 +35,63 @@ export class Environments extends VuexModule {
     }
   }
 
+  get environments (): Environment[] {
+    return this.items
+  }
+
+  get hasAny (): boolean {
+    return this.items.length > 0
+  }
+
   // Actions
 
   @Action
   public async get (environmentID: string) {
-    console.log('DEBUG: Store login called')
+    console.log('DEBUG: environment store - [action]get')
 
     // If not in the cache then get it
-    const user = await environmentService.get(environmentID) // What if error
-    this.context.commit('updateUser', user)
-    this.context.commit('updateIsAuthenticated', user !== undefined)
-    console.log('DEBUG: Store login complete.') // Should send a message to the UI indicating that login failed
+    const environment = await environmentService.get(environmentID) // What if error
+    this.context.commit('updateEnvironment', environment)
+    console.log('DEBUG: environment store - [action]get - complete')
   }
 
   @Action
   public async getAll () {
-    console.log('DEBUG: Store login called')
-    const user = await environmentService.getAll() // What if error
-    this.context.commit('updateUser', user)
-    this.context.commit('updateIsAuthenticated', user !== undefined)
-    console.log('DEBUG: Store login complete.') // Should send a message to the UI indicating that login failed
+    console.log('DEBUG: environment store - [action]getAll')
+    const environments = await environmentService.getAll() // What if error
+    this.context.commit('updateAllEnvironments', environments)
+    console.log('DEBUG: environment store - [action]getAll - complete')
   }
 
   @Action
   public async delete (environmentID: string) {
+    console.log('DEBUG: environment store - [action]delete')
     await environmentService.delete(environmentID) // What if error
-    this.context.commit('updateUser', {})
-    this.context.commit('updateIsAuthenticated', false)
+    this.context.commit('removeEnvironment', environmentID)
+    console.log('DEBUG: environment store - [action]delete - complete')
   }
 
   // Mutations
+  @Mutation
+  updateAllEnvironments (environments: Environment[]) {
+    this.items = environments
+  }
+
+  @Mutation
+  updateEnvironment (environment: Environment) {
+    const index = this.items.findIndex(x => x.id === environment.id)
+    if (index > -1) {
+      this.items.splice(index, 1, environment)
+    } else {
+      this.items.push(environment)
+    }
+  }
+
+  @Mutation
+  removeEnvironment (environmentID: string) {
+    const index = this.items.findIndex(x => x.id === environmentID)
+    if (index > -1) {
+      this.items.splice(index, 1)
+    }
+  }
 }

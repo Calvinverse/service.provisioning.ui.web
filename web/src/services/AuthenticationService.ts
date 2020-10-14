@@ -1,5 +1,8 @@
 import { MsalConfig } from '@/config/msalConfig'
+import { Constants } from '@/types'
+import { Channel, EventBus, Topic } from 'estacion/lib'
 import * as Msal from 'msal'
+import { EventBusService } from './EventBusService'
 
 const config = new MsalConfig()
 
@@ -26,6 +29,12 @@ export class AuthenticationService implements AuthenticationServiceDefinition {
   private app: Msal.UserAgentApplication
   private scopes: string[]
 
+  private bus: EventBus
+
+  private authenticationChannel: Channel
+  private loginTopic: Topic
+  private logoutTopic: Topic
+
   private constructor (clientId: string, authority: string, scopes: string[]) {
     this.app = new Msal.UserAgentApplication(
       {
@@ -43,6 +52,11 @@ export class AuthenticationService implements AuthenticationServiceDefinition {
     )
 
     this.scopes = scopes
+
+    this.bus = EventBusService.getInstance().getBus()
+    this.authenticationChannel = this.bus.channel(Constants.authenticationChannel)
+    this.loginTopic = this.authenticationChannel.topic(Constants.userLoginTopic)
+    this.logoutTopic = this.authenticationChannel.topic(Constants.userLogoutTopic)
   }
 
   async login (): Promise<boolean> {
@@ -78,11 +92,14 @@ export class AuthenticationService implements AuthenticationServiceDefinition {
       }
     }
 
+    this.loginTopic.emit({})
+
     return true
   }
 
   logout (): void {
     this.app.logout()
+    this.logoutTopic.emit({})
   }
 
   getUser (): Msal.Account {

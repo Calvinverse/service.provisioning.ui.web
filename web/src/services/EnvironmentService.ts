@@ -49,7 +49,65 @@ export class EnvironmentService {
 
   async getAll (): Promise<Environment[]> {
     // Get all the environments
-    return new Array<Environment>()
+    return new Array<Environment>(
+      {
+        id: 'a',
+        name: 'Environment A',
+        description: 'Description for Environment A',
+        createdOn: new Date(),
+        destroyBy: new Date(),
+        resources: new Array<string>(),
+        tags: new Array<TagDefinition>(
+          {
+            name: 'createdBy',
+            value: 'terraform'
+          } as TagDefinition,
+          {
+            name: 'environment',
+            value: 'production'
+          } as TagDefinition
+        ),
+        version: '1.0.0'
+      } as Environment,
+      {
+        id: 'b',
+        name: 'Environment B',
+        description: 'Description for Environment B',
+        createdOn: new Date(),
+        destroyBy: new Date(),
+        resources: new Array<string>(),
+        tags: new Array<TagDefinition>(
+          {
+            name: 'createdBy',
+            value: 'terraform'
+          } as TagDefinition,
+          {
+            name: 'environment',
+            value: 'test'
+          } as TagDefinition
+        ),
+        version: '3.2.5'
+      } as Environment,
+      {
+        id: 'c',
+        name: 'Environment C',
+        description: 'Description for Environment C',
+        createdOn: new Date(),
+        destroyBy: new Date(),
+        resources: new Array<string>(),
+        tags: new Array<TagDefinition>(
+          {
+            name: 'createdBy',
+            value: 'terraform'
+          } as TagDefinition,
+          {
+            name: 'environment',
+            value: 'dev'
+          } as TagDefinition
+        ),
+        version: '6.7.524'
+      } as Environment
+    )
   }
 
   async get (environmentID: string): Promise<Environment> {

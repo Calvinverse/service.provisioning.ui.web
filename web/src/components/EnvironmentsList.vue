@@ -1,28 +1,53 @@
 <template>
-  <v-container>
-    <li v-for="(item, index) in environmentList" :key="item.id" :data-index="index">
-      <v-card class="event-card">
-        <v-layout row>
-          <v-layout column justify-space-between style="padding: 0.8em 1.3em; max-width: 390px;">
-            <div>
-              <h1 class="name"></h1>
-              <h3 class="date"></h3>
-            </div>
-            <div>
-              <p class="desc"></p>
-              <div class="location">
-                <v-icon v-if="item.address">location_on</v-icon>
-
-              </div>
-            </div>
-            <div class="date-ribbon">
-              <h2></h2>
-              <h1></h1>
-            </div>
-          </v-layout>
-        </v-layout>
-      </v-card>
-    </li>
+  <v-container fill-height>
+    <v-container
+      >
+      <v-row v-for="(item, index) in environments" :key="item.id" :data-index="index">
+        <v-col>
+          <v-card
+            color="secondary"
+            outlined>
+            <v-container>
+              <v-row>
+                <v-col>
+                  <h2>{{ item.name }}</h2>
+                  <span>{{ item.description }}</span>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  Created on:
+                </v-col>
+                <v-col>
+                  {{ item.createdOn }}
+                </v-col>
+                <v-spacer />
+              </v-row>
+              <v-row>
+                <v-col>
+                  Destroy by:
+                </v-col>
+                <v-col>
+                  {{ item.destroyBy }}
+                </v-col>
+                <v-spacer />
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-chip
+                    v-for="(tag, tagIndex) in item.tags" :key="tag.name" :data-index="tagIndex"
+                    color="success"
+                    outlined
+                  >
+                    {{ tag.name }}: {{ tag.value }}
+                  </v-chip>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
     <v-bottom-navigation>
       <v-btn>
         <span>Add</span>
@@ -41,21 +66,47 @@
 
 import Vue from 'vue'
 import {
-  namespace,
-  State
+  namespace
 } from 'vuex-class'
 import Component from 'vue-class-component'
-import { Environments } from '../store/environment'
+import {
+  Environment
+} from '../store/environment'
+import { Channel, EventBus, Listener, Topic } from 'estacion/lib'
+import { EventBusService } from '../services/EventBusService'
+import { Constants } from '../types'
 
 const environmentModule = namespace('environment')
 
 @Component
 export default class EnvironmentsList extends Vue {
-  @State('environment') environments!: Environments
-  @environmentModule.Action('get') get: any
+  private bus: EventBus
+  private authenticationChannel: Channel
+  private loginTopic: Topic
+  private logoutTopic: Topic
+
+  constructor () {
+    super()
+
+    this.bus = EventBusService.getInstance().getBus()
+    this.authenticationChannel = this.bus.channel(Constants.authenticationChannel)
+    this.loginTopic = this.authenticationChannel.topic(Constants.userLoginTopic)
+    this.logoutTopic = this.authenticationChannel.topic(Constants.userLogoutTopic)
+
+    const loginListener: Listener = event => {
+      this.getAll()
+    }
+    this.loginTopic.addListener(loginListener)
+
+    const logoutListener: Listener = event => {
+      // clear
+    }
+    this.logoutTopic.addListener(logoutListener)
+  }
+
   @environmentModule.Action('getAll') getAll: any
   @environmentModule.Action('delete') delete: any
-  // @environmentModule.Getter('fullName') fullName!: string
-  // @environmentModule.Getter('gravatarImage') gravatarImage!: string
+  @environmentModule.Getter('environments') environments!: Environment[]
+  @environmentModule.Getter('hasAny') hasAny!: boolean
 }
 </script>

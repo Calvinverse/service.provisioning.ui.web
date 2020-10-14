@@ -1,5 +1,14 @@
 <template>
+  <!--
+    - Environment description at the top
+    - Templates that were used
+    - List of resource groups with their status
+    - Way to update resources per group
+    - Graph of resources?
+  -->
+  <v-container>
 
+  </v-container>
 </template>
 
 <script lang="ts">
