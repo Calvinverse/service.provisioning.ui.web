@@ -35,10 +35,10 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col
-          cols="3"
-          class="fill-height">
+            cols="3"
+            class="fill-height">
             <UserCard />
-        </v-col>
+          </v-col>
         </v-row>
       </v-container>
     </v-app-bar>
@@ -121,6 +121,7 @@ export default class App extends Vue {
   private data: any = {
     footerItems: [
       { title: 'Home', href: '/' },
+      { title: 'Documentation', href: '/documentation' },
       { title: 'About Us', href: '/about' }
     ],
     menuItems: [

@@ -15,6 +15,7 @@
     "@types/gravatar": "^1.8.1",
     "axios": "^0.20.0",
     "core-js": "^3.6.5",
+    "estacion": "^1.2.2",
     "gravatar": "^1.8.1",
     "msal": "^1.4.0",
     "rapidoc": "^8.2.0",
@@ -26,7 +27,8 @@
     "vue-rx": "^6.2.0",
     "vuetify": "^2.2.11",
     "vuex": "^3.4.0",
-    "vuex-class": "^0.3.2"
+    "vuex-class": "^0.3.2",
+    "vuex-module-decorators": "^1.0.1"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",

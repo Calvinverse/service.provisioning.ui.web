@@ -1,10 +1,41 @@
+import { MsalConfig } from '@/config/msalConfig'
+import { Constants } from '@/types'
+import { Channel, EventBus, Topic } from 'estacion/lib'
 import * as Msal from 'msal'
+import { EventBusService } from './EventBusService'
 
-export class AuthenticationService {
+const config = new MsalConfig()
+
+export interface AuthenticationServiceDefinition {
+  login(): void;
+  logout(): void;
+  getUser(): Msal.Account;
+  isAuthenticated(): boolean;
+}
+
+// This should be a singleton because internally Msal.UserAgentApplication keeps state
+// which isn't linked to vuex or anything
+export class AuthenticationService implements AuthenticationServiceDefinition {
+  private static instance: AuthenticationService
+
+  static getInstance (): AuthenticationService {
+    if (!AuthenticationService.instance) {
+      AuthenticationService.instance = new AuthenticationService(config.clientID, config.authority, config.scopes)
+    }
+
+    return AuthenticationService.instance
+  }
+
   private app: Msal.UserAgentApplication
   private scopes: string[]
 
-  constructor (clientId: string, authority: string, scopes: string[]) {
+  private bus: EventBus
+
+  private authenticationChannel: Channel
+  private loginTopic: Topic
+  private logoutTopic: Topic
+
+  private constructor (clientId: string, authority: string, scopes: string[]) {
     this.app = new Msal.UserAgentApplication(
       {
         auth: {
@@ -21,9 +52,14 @@ export class AuthenticationService {
     )
 
     this.scopes = scopes
+
+    this.bus = EventBusService.getInstance().getBus()
+    this.authenticationChannel = this.bus.channel(Constants.authenticationChannel)
+    this.loginTopic = this.authenticationChannel.topic(Constants.userLoginTopic)
+    this.logoutTopic = this.authenticationChannel.topic(Constants.userLogoutTopic)
   }
 
-  async login () {
+  async login (): Promise<boolean> {
     const loginRequest = {
       scopes: this.scopes,
       prompt: 'select_account'
@@ -38,7 +74,7 @@ export class AuthenticationService {
       console.log(`Login was a success ${loginResponse}`)
     } catch (error) {
       console.log(`Login error ${error}`)
-      return undefined
+      return false
     }
 
     try {
@@ -52,18 +88,25 @@ export class AuthenticationService {
         console.log(`Token response acquired with a pop up - ${tokenResponse}`)
       } catch (errorPopup) {
         console.log(`Error acquiring the popup: ${errorPopup}`)
-        return undefined
+        return false
       }
     }
 
-    return this.getUser()
+    this.loginTopic.emit({})
+
+    return true
   }
 
-  logout () {
+  logout (): void {
     this.app.logout()
+    this.logoutTopic.emit({})
   }
 
-  getUser () {
+  getUser (): Msal.Account {
     return this.app.getAccount()
+  }
+
+  isAuthenticated (): boolean {
+    return this.app !== undefined
   }
 }

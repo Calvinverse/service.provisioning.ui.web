@@ -4,35 +4,42 @@
       origin="center center"
       transition="scale-transition"
       color="secondary"
-      :rounded="b-xl"
-      :offset-y="offset"
+      rounded="b-xl"
+      offset-y
     >
       <template v-slot:activator="{ on, attrs }">
         <v-card
           color="secondary"
           v-bind="attrs"
           v-on="on"
-          height="100%"
+          class="fill-height rounded-t-xl"
           >
           <v-container
-            fill-height>
+            class="fill-height pa-0">
             <v-row
-              >
+              align="center"
+              class="fill-height">
               <v-col
-                cols="2">
+                cols="2"
+                align-self="center"
+                class="fill-height d-inline-flex">
                 <v-avatar
+                  class="ml-3"
                   v-if="!profile.isAuthenticated">
                   <v-icon x-large>mdi-account-circle</v-icon>
                 </v-avatar>
                 <v-avatar
+                  class="ml-3"
                   v-if="profile.isAuthenticated">
                   <v-img
                     :src="gravatarImage"
                   />
                 </v-avatar>
               </v-col>
-              <v-col>
-                <v-card-title>{{ userName }}</v-card-title>
+              <v-col
+                align-self="center"
+                class="fill-height">
+                <v-card-title class="fill-height pa-0">{{ userName }}</v-card-title>
               </v-col>
             </v-row>
           </v-container>
@@ -59,13 +66,13 @@ import {
   State
 } from 'vuex-class'
 import Component from 'vue-class-component'
-import { ProfileState } from '../store/profile/ProfileState'
+import Profile from '../store/profile/index'
 
 const profileModule = namespace('profile')
 
 @Component
 export default class UserCard extends Vue {
-  @State('profile') profile!: ProfileState
+  @State('profile') profile!: Profile
   @profileModule.Action('login') login: any
   @profileModule.Action('logout') logout: any
   @profileModule.Getter('fullName') fullName!: string
