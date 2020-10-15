@@ -8,10 +8,27 @@
             color="secondary"
             outlined>
             <v-container>
+              <!-- Status image -->
               <v-row>
+                <v-col>
+                  <v-avatar>
+                    <v-icon
+                      :color="environmentStatusColor(item.status)"
+                      x-large>
+                      {{ environmentStatusIcon(item.status) }}
+                    </v-icon>
+                  </v-avatar>
+                </v-col>
                 <v-col>
                   <h2>{{ item.name }}</h2>
                   <span>{{ item.description }}</span>
+                  <span>{{ item.version }}</span>
+                </v-col>
+                <v-spacer>
+                </v-spacer>
+                <v-col>
+                  <h3>Resources</h3>
+                  <span>{{ item.resources.length }}</span>
                 </v-col>
               </v-row>
               <v-row>
@@ -108,5 +125,13 @@ export default class EnvironmentsList extends Vue {
   @environmentModule.Action('delete') delete: any
   @environmentModule.Getter('environments') environments!: Environment[]
   @environmentModule.Getter('hasAny') hasAny!: boolean
+
+  environmentStatusIcon (status: string) {
+    return status === 'ok' ? 'mdi-checkbox-marked-circle' : 'mdi-close-circle'
+  }
+
+  environmentStatusColor (status: string) {
+    return status === 'ok' ? 'success' : 'error'
+  }
 }
 </script>
