@@ -12,20 +12,24 @@
           color="secondary"
           v-bind="attrs"
           v-on="on"
-          class="fill-height"
+          class="fill-height rounded-t-xl"
           >
           <v-container
-            class="fill-height">
+            class="fill-height pa-0">
             <v-row
+              align="center"
               class="fill-height">
               <v-col
                 cols="2"
-                class="fill-height">
+                align-self="center"
+                class="fill-height d-inline-flex">
                 <v-avatar
+                  class="ml-3"
                   v-if="!profile.isAuthenticated">
                   <v-icon x-large>mdi-account-circle</v-icon>
                 </v-avatar>
                 <v-avatar
+                  class="ml-3"
                   v-if="profile.isAuthenticated">
                   <v-img
                     :src="gravatarImage"
@@ -33,8 +37,9 @@
                 </v-avatar>
               </v-col>
               <v-col
+                align-self="center"
                 class="fill-height">
-                <v-card-title>{{ userName }}</v-card-title>
+                <v-card-title class="fill-height pa-0">{{ userName }}</v-card-title>
               </v-col>
             </v-row>
           </v-container>
