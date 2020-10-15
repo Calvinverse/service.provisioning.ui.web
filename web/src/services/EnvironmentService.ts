@@ -11,11 +11,34 @@ export class Environment implements EnvironmentDefinition {
   createdOn: Date = new Date()
   destroyBy: Date = new Date()
   resources: string[] = new Array<string>()
+  statusUrl = ''
   tags: TagDefinition[] = new Array<TagDefinition>()
   version = ''
 
+  constructor (
+    id = '',
+    name = '',
+    description = '',
+    createdOn: Date = new Date(),
+    destroyBy: Date = new Date(),
+    resources: string[] = new Array<string>(),
+    statusUrl = '',
+    tags: TagDefinition[] = new Array<TagDefinition>(),
+    version = ''
+  ) {
+    this.id = id
+    this.name = name
+    this.description = description
+    this.createdOn = createdOn
+    this.destroyBy = destroyBy
+    this.resources = resources
+    this.tags = tags
+    this.statusUrl = statusUrl
+    this.version = version
+  }
+
   status (): string {
-    throw new Error('Method not implemented.')
+    return this.statusUrl === 'https://example.com/status/ok' ? 'ok' : 'failure'
   }
 
   create (templateID: string): string[] {
@@ -50,33 +73,50 @@ export class EnvironmentService {
   async getAll (): Promise<Environment[]> {
     // Get all the environments
     return new Array<Environment>(
-      {
-        id: 'a',
-        name: 'Environment A',
-        description: 'Description for Environment A',
-        createdOn: new Date(),
-        destroyBy: new Date(),
-        resources: new Array<string>(),
-        tags: new Array<TagDefinition>(
+      new Environment(
+        'a',
+        'Environment A',
+        'Description for Environment A',
+        new Date(),
+        new Date(),
+        new Array<string>(),
+        'https://example.com/status/ok',
+        new Array<TagDefinition>(
           {
             name: 'createdBy',
             value: 'terraform'
+          } as TagDefinition,
+          {
+            name: 'source',
+            value: 'abcdef123454566'
+          } as TagDefinition,
+          {
+            name: 'version',
+            value: '1.0.0'
+          } as TagDefinition,
+          {
+            name: 'location',
+            value: 'Australia East'
+          } as TagDefinition,
+          {
+            name: 'cloud',
+            value: 'Azure'
           } as TagDefinition,
           {
             name: 'environment',
             value: 'production'
           } as TagDefinition
         ),
-        version: '1.0.0'
-      } as Environment,
-      {
-        id: 'b',
-        name: 'Environment B',
-        description: 'Description for Environment B',
-        createdOn: new Date(),
-        destroyBy: new Date(),
-        resources: new Array<string>(),
-        tags: new Array<TagDefinition>(
+        '1.0.0'),
+      new Environment(
+        'b',
+        'Environment B',
+        'Description for Environment B',
+        new Date(),
+        new Date(),
+        new Array<string>(),
+        'https://example.com/status/failure',
+        new Array<TagDefinition>(
           {
             name: 'createdBy',
             value: 'terraform'
@@ -86,16 +126,16 @@ export class EnvironmentService {
             value: 'test'
           } as TagDefinition
         ),
-        version: '3.2.5'
-      } as Environment,
-      {
-        id: 'c',
-        name: 'Environment C',
-        description: 'Description for Environment C',
-        createdOn: new Date(),
-        destroyBy: new Date(),
-        resources: new Array<string>(),
-        tags: new Array<TagDefinition>(
+        '3.2.5'),
+      new Environment(
+        'c',
+        'Environment C',
+        'Description for Environment C',
+        new Date(),
+        new Date(),
+        new Array<string>(),
+        'https://example.com/status/ok',
+        new Array<TagDefinition>(
           {
             name: 'createdBy',
             value: 'terraform'
@@ -105,8 +145,7 @@ export class EnvironmentService {
             value: 'dev'
           } as TagDefinition
         ),
-        version: '6.7.524'
-      } as Environment
+        '6.7.524')
     )
   }
 

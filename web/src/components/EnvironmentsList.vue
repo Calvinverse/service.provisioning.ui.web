@@ -5,59 +5,89 @@
       <v-row v-for="(item, index) in environments" :key="item.id" :data-index="index">
         <v-col>
           <v-card
-            color="secondary"
-            outlined>
+            class="rounded-xl"
+            color="primary"
+            outlined
+            @click="navigateToDetail(item.id)">
             <v-container>
-              <!-- Status image -->
               <v-row>
-                <v-col>
-                  <v-avatar>
+                <v-col
+                  align-self="center"
+                  cols="1">
+                  <v-avatar
+                    align="center"
+                    justify="center">
                     <v-icon
-                      :color="environmentStatusColor(item.status)"
+                      :color="environmentStatusColor(item)"
                       x-large>
-                      {{ environmentStatusIcon(item.status) }}
+                      {{ environmentStatusIcon(item) }}
                     </v-icon>
                   </v-avatar>
                 </v-col>
                 <v-col>
-                  <h2>{{ item.name }}</h2>
-                  <span>{{ item.description }}</span>
-                  <span>{{ item.version }}</span>
+                  <v-container
+                    class="pa-0">
+                    <v-row
+                      class="pa-0 pb-2">
+                      <v-col
+                        class="pa-0">
+                        <h2>{{ item.name }}</h2>
+                        <span>{{ item.description }}</span>
+                      </v-col>
+                    </v-row>
+                    <v-divider></v-divider>
+                    <v-row
+                      class="pa-0 pt-2">
+                      <v-col
+                        class="pa-0"
+                        cols="3">
+                        Version:
+                      </v-col>
+                      <v-col
+                        class="pa-0">
+                        {{ item.version }}
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col
+                        class="pa-0"
+                        cols="3">
+                        Created on:
+                      </v-col>
+                      <v-col
+                        class="pa-0">
+                        {{ item.createdOn.toISOString() }}
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col
+                        class="pa-0"
+                        cols="3">
+                        Destroy by:
+                      </v-col>
+                      <v-col
+                        class="pa-0">
+                        {{ item.destroyBy.toISOString() }}
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                    <v-col
+                      class="pa-0 pt-2">
+                      <v-chip
+                        class="mr-3 mb-3"
+                        v-for="(tag, tagIndex) in item.tags" :key="tag.name" :data-index="tagIndex"
+                        color="info"
+                      >
+                        {{ tag.name }}: {{ tag.value }}
+                      </v-chip>
+                    </v-col>
+                  </v-row>
+                  </v-container>
                 </v-col>
-                <v-spacer>
-                </v-spacer>
+                <v-spacer />
                 <v-col>
                   <h3>Resources</h3>
                   <span>{{ item.resources.length }}</span>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col>
-                  Created on:
-                </v-col>
-                <v-col>
-                  {{ item.createdOn }}
-                </v-col>
-                <v-spacer />
-              </v-row>
-              <v-row>
-                <v-col>
-                  Destroy by:
-                </v-col>
-                <v-col>
-                  {{ item.destroyBy }}
-                </v-col>
-                <v-spacer />
-              </v-row>
-              <v-row>
-                <v-col>
-                  <v-chip
-                    v-for="(tag, tagIndex) in item.tags" :key="tag.name" :data-index="tagIndex"
-                    color="success"
-                    outlined
-                  >
-                    {{ tag.name }}: {{ tag.value }}
-                  </v-chip>
                 </v-col>
               </v-row>
             </v-container>
@@ -86,12 +116,10 @@ import {
   namespace
 } from 'vuex-class'
 import Component from 'vue-class-component'
-import {
-  Environment
-} from '../store/environment'
 import { Channel, EventBus, Listener, Topic } from 'estacion/lib'
 import { EventBusService } from '../services/EventBusService'
 import { Constants } from '../types'
+import { Environment } from '../services/EnvironmentService'
 
 const environmentModule = namespace('environment')
 
@@ -116,22 +144,32 @@ export default class EnvironmentsList extends Vue {
     this.loginTopic.addListener(loginListener)
 
     const logoutListener: Listener = event => {
-      // clear
+      this.clear()
     }
     this.logoutTopic.addListener(logoutListener)
   }
 
+  @environmentModule.Action('clear') clear: any
   @environmentModule.Action('getAll') getAll: any
   @environmentModule.Action('delete') delete: any
   @environmentModule.Getter('environments') environments!: Environment[]
   @environmentModule.Getter('hasAny') hasAny!: boolean
 
-  environmentStatusIcon (status: string) {
-    return status === 'ok' ? 'mdi-checkbox-marked-circle' : 'mdi-close-circle'
+  environmentStatusIcon (environment: Environment) {
+    return environment.status() === 'ok' ? 'mdi-checkbox-marked-circle' : 'mdi-close-circle'
   }
 
-  environmentStatusColor (status: string) {
-    return status === 'ok' ? 'success' : 'error'
+  environmentStatusColor (environment: Environment) {
+    return environment.status() === 'ok' ? 'success' : 'error'
+  }
+
+  navigateToDetail (environmentID: string): void {
+    this.$router.push({
+      name: 'Environment',
+      params: {
+        id: environmentID
+      }
+    })
   }
 }
 </script>

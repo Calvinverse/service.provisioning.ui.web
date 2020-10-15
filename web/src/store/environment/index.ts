@@ -5,21 +5,9 @@ import {
   Action
 } from 'vuex-module-decorators'
 import { AuthenticationService } from '../../services/AuthenticationService'
-import { EnvironmentService } from '../../services/EnvironmentService'
+import { Environment, EnvironmentService } from '../../services/EnvironmentService'
 
 const environmentService = new EnvironmentService(AuthenticationService.getInstance())
-
-export class Environment {
-  id = ''
-  name = ''
-  description = ''
-  createdOn: Date = new Date()
-  destroyBy: Date = new Date()
-  status = ''
-  resources: string[] = []// ID of resources
-  tags: string[] = [] // ID of tags
-  version = ''
-}
 
 @Module({ namespaced: true })
 export class Environments extends VuexModule {
@@ -44,6 +32,12 @@ export class Environments extends VuexModule {
   }
 
   // Actions
+  @Action
+  public clear () {
+    console.log('DEBUG: environment store - [action]clear')
+    this.context.commit('updateAllEnvironments', [])
+    console.log('DEBUG: environment store - [action]clear - complete')
+  }
 
   @Action
   public async get (environmentID: string) {
