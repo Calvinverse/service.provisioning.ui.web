@@ -106,6 +106,8 @@
       </v-col>
     </v-row>
 
+    <!-- Templates -->
+
     <!-- Graph -->
     <v-row>
 
