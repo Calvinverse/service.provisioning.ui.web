@@ -1,0 +1,233 @@
+basePath: /api
+definitions:
+  environment.Environment:
+    type: object
+  health.InfoResponse:
+    properties:
+      buildtime:
+        type: string
+      revision:
+        type: string
+      version:
+        type: string
+    type: object
+  health.PingResponse:
+    properties:
+      buildtime:
+        type: string
+      response:
+        type: string
+      revision:
+        type: string
+      version:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Provides information about deployed environments and the templates
+    used to created these environments.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Service.Provisioning server API
+  version: "1.0"
+paths:
+  /v1/doc:
+    get:
+      consumes:
+      - application/json
+      description: Returns the OpenAPI document for the current service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/environment.Environment'
+      summary: Returns the OpenAPI document for the current service
+      tags:
+      - doc
+  /v1/environment:
+    put:
+      consumes:
+      - application/json
+      description: Creates a new environment based on the provided information.
+      parameters:
+      - description: Environment ID
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/environment.Environment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/environment.Environment'
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Creates a new environment.
+      tags:
+      - environment
+  /v1/environment/:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of known environment IDs.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Provide the list of known environment IDs
+      tags:
+      - environment
+  /v1/environment/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the environment with the given id.
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/environment.Environment'
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Deletes an environment.
+      tags:
+      - environment
+    get:
+      consumes:
+      - application/json
+      description: Returns information about the environment with the given id.
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/environment.Environment'
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
+      summary: Provide information about an environment.
+      tags:
+      - environment
+  /v1/self/info:
+    get:
+      consumes:
+      - application/json
+      description: Respond to an info request with information about the application.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/health.InfoResponse'
+      summary: Respond to an info request
+      tags:
+      - health
+  /v1/self/ping:
+    get:
+      consumes:
+      - application/json
+      description: Respond to a ping request with information about the application.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/health.PingResponse'
+      summary: Respond to a ping request
+      tags:
+      - health
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+  BasicAuth:
+    type: basic
+  OAuth2AccessCode:
+    authorizationUrl: https://example.com/oauth/authorize
+    flow: accessCode
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+    tokenUrl: https://example.com/oauth/token
+    type: oauth2
+  OAuth2Application:
+    flow: application
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+      write: ' Grants write access'
+    tokenUrl: https://example.com/oauth/token
+    type: oauth2
+  OAuth2Implicit:
+    authorizationUrl: https://example.com/oauth/authorize
+    flow: implicit
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+      write: ' Grants write access'
+    type: oauth2
+  OAuth2Password:
+    flow: password
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+      read: ' Grants read access'
+      write: ' Grants write access'
+    tokenUrl: https://example.com/oauth/token
+    type: oauth2
+swagger: "2.0"
