@@ -2,7 +2,7 @@
 consul:
   enabled: false
   host: localhost
-  keyPath: config/services/provisioning
+  keyPath: config/services/provisioning.ui.web
   port: 8500
 log:
   level: debug

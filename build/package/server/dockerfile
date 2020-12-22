@@ -28,8 +28,8 @@ RUN CGO_ENABLED=0\
   -a\
   -installsuffix cgo\
   -v\
-  -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=${REVISION} -X github.com/calvinverse/service.provisioning/internal/info.buildTime=${NOW} -X github.com/calvinverse/service.provisioning/internal/info.version=${VERSION}"\
-  -o service.provisioning\
+  -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/info.sha1=${REVISION} -X github.com/calvinverse/service.provisioning.ui.web/internal/info.buildTime=${NOW} -X github.com/calvinverse/service.provisioning.ui.web/internal/info.version=${VERSION}"\
+  -o server\
   ./cmd
 
 # Run tests
@@ -85,35 +85,37 @@ RUN cd /web && npm run lint && npm run build
 FROM testcalvinverse.azurecr.io/base.container.linux:latest
 
 ARG port=8080
-ARG ui_path=/etc/service.provisioning/client
+ARG ui_path=/etc/provisioning.bff/client
 
 # Create a user and group first so the IDs get set the same way, even as
 # the rest of this may change over time.
 RUN addgroup provisioning && adduser provisioning --system --ingroup provisioning
 
-RUN mkdir -p /etc/service.provisioning && chown -R provisioning:provisioning /etc/service.provisioning && \
-  mkdir -p /etc/service.provisioning/conf.d && chown -R provisioning:provisioning /etc/service.provisioning/conf.d && \
-  mkdir -p /etc/service.provisioning/doc && chown -R provisioning:provisioning /etc/service.provisioning/doc &&
+RUN mkdir -p /etc/provisioning.bff && chown -R provisioning:provisioning /etc/provisioning.bff && \
+  mkdir -p /etc/provisioning.bff/conf.d && chown -R provisioning:provisioning /etc/provisioning.bff/conf.d && \
+  mkdir -p /etc/provisioning.bff/doc && chown -R provisioning:provisioning /etc/provisioning.bff/doc &&
 
-COPY --from=build-go /app/service.provisioning /usr/bin
-RUN /usr/bin/service.provisioning
+COPY --from=build-go /app/server /usr/bin
 
-COPY --from=build-go /app/configs/config.yaml /etc/service.provisioning/conf.d
+# Run the server app as sanity check
+RUN /usr/bin/server
 
-COPY --from=build-go /app/api/swagger.json /etc/service.provisioning/doc
+COPY --from=build-go /app/configs/config.yaml /etc/provisioning.bff/conf.d
+
+COPY --from=build-go /app/api/swagger.json /etc/provisioning.bff/doc
 
 COPY --from=build-node /web/dist/ ${ui_path}
 
-COPY ./build/package/server/service.provisioning.sh /etc/service/service.provisioning/run
+COPY ./build/package/server/server.sh /etc/service/provisioning.bff/run
 
-RUN dos2unix /etc/service/service.provisioning/run && \
-  chmod +x /etc/service/service.provisioning/run
+RUN dos2unix /etc/service/provisioning.bff/run && \
+  chmod +x /etc/service/provisioning.bff/run
 
-RUN ls -la /etc/service/service.provisioning
+RUN ls -la /etc/service/provisioning.bff
 
 ENV PROVISION_SERVICE_PORT ${port}
 ENV PROVISION_UI_PATH ${ui_path}
-ENV PROVISION_CONFIG_PATH /etc/service.provisioning/conf.d/config.yaml
-ENV PROVISION_DOC_PATH /etc/service.provisioning/doc
+ENV PROVISION_CONFIG_PATH /etc/provisioning.bff/conf.d/config.yaml
+ENV PROVISION_DOC_PATH /etc/provisioning.bff/doc
 
 EXPOSE ${port}

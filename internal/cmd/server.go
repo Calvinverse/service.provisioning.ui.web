@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/spf13/cobra"
 
-	"github.com/calvinverse/service.provisioning/internal/config"
-	"github.com/calvinverse/service.provisioning/internal/router"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
 )
 
 // ServerCommandBuilder creates new Cobra Commands for the server capability.
@@ -18,7 +18,7 @@ type ServerCommandBuilder interface {
 	New() *cobra.Command
 }
 
-// @title Service.Provisioning server API
+// @title Service.Provisioning.UI.Web server API
 // @version 1.0
 // @description Provides information about deployed environments and the templates used to created these environments.
 // @termsOfService http://swagger.io/terms/
@@ -77,7 +77,7 @@ func (s serverCommandBuilder) New() *cobra.Command {
 	return &cobra.Command{
 		Use:   "server",
 		Short: "Runs the application as a server",
-		Long:  "Runs the service.provisioning application in server mode",
+		Long:  "Runs the service.provisioning.ui.web application in server mode",
 		RunE:  s.executeServer,
 	}
 }

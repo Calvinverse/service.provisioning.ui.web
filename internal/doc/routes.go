@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/calvinverse/service.provisioning/internal/config"
-	"github.com/calvinverse/service.provisioning/internal/router"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
 	"github.com/go-chi/chi"
 
 	log "github.com/sirupsen/logrus"

@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/calvinverse/service.provisioning/internal/config"
-	"github.com/calvinverse/service.provisioning/internal/info"
-	"github.com/calvinverse/service.provisioning/internal/service"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/info"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/service"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 	resolver service.Resolver
 
 	rootCmd = &cobra.Command{
-		Use:     "service.provisioning",
+		Use:     "server",
 		Version: info.Version(),
 	}
 )

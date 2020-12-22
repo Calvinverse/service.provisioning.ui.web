@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/calvinverse/service.provisioning/internal/info"
-	"github.com/calvinverse/service.provisioning/internal/router"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/info"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )
