@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "Provides information about deployed environments and the templates used to created these environments.",
-        "title": "Service.Provisioning server API",
+        "title": "Service.Provisioning.UI.Web server API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
