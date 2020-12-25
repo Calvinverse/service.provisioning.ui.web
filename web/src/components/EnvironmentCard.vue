@@ -125,7 +125,7 @@ import Component from 'vue-class-component'
 import { Environment } from '../services/EnvironmentService'
 import { Channel, EventBus, Listener, Topic } from 'estacion/lib'
 import { EventBusService } from '../services/EventBusService'
-import { Constants } from '../types'
+import { Constants, TagDefinition } from '../types'
 
 const environmentModule = namespace('environment')
 
@@ -155,6 +155,17 @@ export default class EnvironmentCard extends Vue {
       // this.clear()
     }
     this.logoutTopic.addListener(logoutListener)
+
+    this.item = new Environment(
+      '',
+      '',
+      '',
+      new Date(),
+      new Date(),
+      new Array<string>(),
+      '',
+      new Array<TagDefinition>(),
+      '')
   }
 
   @environmentModule.Action('get') get: any

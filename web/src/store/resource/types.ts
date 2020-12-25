@@ -1,9 +1,9 @@
 
 export interface ResourceState {
-  id: string
-  name: string
+  id: string;
+  name: string;
 
-  templateID: string
+  templateID: string;
 
   // status
 }
