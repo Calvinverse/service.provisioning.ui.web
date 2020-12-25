@@ -93,7 +93,7 @@ RUN addgroup provisioning && adduser provisioning --system --ingroup provisionin
 
 RUN mkdir -p /etc/provisioning.bff && chown -R provisioning:provisioning /etc/provisioning.bff && \
   mkdir -p /etc/provisioning.bff/conf.d && chown -R provisioning:provisioning /etc/provisioning.bff/conf.d && \
-  mkdir -p /etc/provisioning.bff/doc && chown -R provisioning:provisioning /etc/provisioning.bff/doc &&
+  mkdir -p /etc/provisioning.bff/doc && chown -R provisioning:provisioning /etc/provisioning.bff/doc
 
 COPY --from=build-go /app/server /usr/bin
 
