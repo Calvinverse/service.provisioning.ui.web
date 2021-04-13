@@ -100,7 +100,6 @@ function New-Container
     Write-Output "NOW = $date"
     Write-Output "REVISION = $sha1"
     Write-Output "VERSION = $version"
-    Write-Output "Tagging with: service-provisioning:$version"
 
     $command = "docker build"
     $command += " --force-rm"
@@ -111,13 +110,18 @@ function New-Container
 
     if ($dockerTags.Length -gt 0)
     {
+        Write-Output "$($dockerTags.Length)"
         foreach($tag in $dockerTags)
         {
-            $command += " --tag $($tag)/service-provisioning:$version"
+            Write-Output "Tagging with: $($tag)/service-provisioning-ui-web:$version"
+            $command += " --tag $($tag)/service-provisioning-ui-web:$version"
         }
     }
+    else
+    {
+        $command += " --tag service-provisioning-ui-web:$version"
+    }
 
-    $command += " --tag service-provisioning:$version"
     $command += " ."
 
     Write-Output "Invoking: $command"
@@ -165,7 +169,7 @@ function New-LocalBuild
     Add-Content -Path $configPath -Value 'ui:'
     Add-Content -Path $configPath -Value "  path: $clientDirectory"
 
-    go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning/internal/info.version=$version" -o $outputDir/server.exe ./cmd
+    go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning.ui.web/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning.ui.web/internal/info.version=$version" -o $outputDir/server.exe ./cmd
 
     go test -cover ./... ./cmd
 }
@@ -187,6 +191,6 @@ if ($Direct)
 else
 {
     Write-Output "Building locally ..."
-    New-Container -date $date -sha1 $revision -version $version -dockerTags $($dockerTags.Split(','))
+    New-Container -date $date -sha1 $revision -version $version -dockerTags $($dockerTags.Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
 }
 

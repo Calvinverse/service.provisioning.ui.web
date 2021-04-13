@@ -1,4 +1,4 @@
-module github.com/calvinverse/service.provisioning
+module github.com/calvinverse/service.provisioning.ui.web
 
 go 1.14
 

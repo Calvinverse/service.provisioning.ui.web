@@ -28,13 +28,12 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: Provides information about deployed environments and the templates
-    used to created these environments.
+  description: Provides information about deployed environments and the templates used to created these environments.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Service.Provisioning server API
+  title: Service.Provisioning.UI.Web server API
   version: "1.0"
 paths:
   /v1/doc:

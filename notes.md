@@ -36,6 +36,9 @@
 
 ## Backend
 
+This will need its own data store. The data store will be async updated based on update
+messages from other services
+
 ### Naming
 
 * https://stackoverflow.com/questions/38842457/interface-naming-convention-golang

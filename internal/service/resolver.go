@@ -3,12 +3,12 @@ package service
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/calvinverse/service.provisioning/internal/cmd"
-	"github.com/calvinverse/service.provisioning/internal/config"
-	"github.com/calvinverse/service.provisioning/internal/doc"
-	"github.com/calvinverse/service.provisioning/internal/health"
-	"github.com/calvinverse/service.provisioning/internal/router"
-	"github.com/calvinverse/service.provisioning/internal/web"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/cmd"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/doc"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/health"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/web"
 )
 
 // Resolver defines the interface for Inversion-of-Control objects.

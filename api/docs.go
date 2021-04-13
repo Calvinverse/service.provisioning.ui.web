@@ -373,7 +373,7 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "localhost:8080",
 	BasePath:    "/api",
 	Schemes:     []string{},
-	Title:       "Service.Provisioning server API",
+	Title:       "Service.Provisioning.UI.Web server API",
 	Description: "Provides information about deployed environments and the templates used to created these environments.",
 }
 
