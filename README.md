@@ -34,3 +34,8 @@ If you want to put the service in a container then you can invoke the script as:
     ./build.ps1 -dockerTags 'tag1,tag2,tag3'
 
 which builds a Docker container with the given tags.
+
+## Attributions
+
+* Icon based on the [Categories](https://thenounproject.com/search/?creator=718857&q=categories&i=249390) icon
+  created by [Marie Van den Broek](https://thenounproject.com/marie49/).
