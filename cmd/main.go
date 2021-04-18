@@ -1,14 +1,11 @@
 package main
 
 import (
-	"os"
-
-	log "github.com/sirupsen/logrus"
-
 	"github.com/spf13/cobra"
 
 	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/info"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/observability"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/service"
 )
 
@@ -26,7 +23,7 @@ var (
 )
 
 func init() {
-	initializeLogger()
+	observability.InitializeLogger()
 
 	cfg = config.NewConfiguration()
 	resolver := service.NewResolver(cfg)
@@ -41,39 +38,17 @@ func init() {
 }
 
 func initializeConfiguration() {
-	log.Debug("Initializing. Loading configuration ...")
+	observability.LogDebug("Initializing. Loading configuration ...")
 	cfg.LoadConfiguration(cfgFile)
 
 	if cfg.IsSet("log.level") {
-		switch level := cfg.GetString("log.level"); level {
-		case "trace":
-			log.SetLevel(log.TraceLevel)
-		case "debug":
-			log.SetLevel(log.DebugLevel)
-		case "info":
-			log.SetLevel(log.InfoLevel)
-		case "warn":
-			log.SetLevel(log.WarnLevel)
-		case "error":
-			log.SetLevel(log.ErrorLevel)
-		case "fatal":
-			log.SetLevel(log.FatalLevel)
-		default:
-			log.SetLevel(log.InfoLevel)
-		}
+		level := cfg.GetString("log.level")
+		observability.SetLogLevel(level)
 	}
-}
-
-func initializeLogger() {
-	log.SetFormatter(&log.JSONFormatter{})
-
-	log.SetOutput(os.Stdout)
-
-	log.SetLevel(log.InfoLevel)
 }
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+		observability.LogFatal(err)
 	}
 }

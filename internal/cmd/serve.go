@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -10,11 +11,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
+	info "github.com/calvinverse/service.provisioning.ui.web/internal/info"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/observability"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
 )
 
-// ServerCommandBuilder creates new Cobra Commands for the server capability.
-type ServerCommandBuilder interface {
+// ServeCommandBuilder creates new Cobra Commands for the server capability.
+type ServeCommandBuilder interface {
 	New() *cobra.Command
 }
 
@@ -60,20 +63,20 @@ type ServerCommandBuilder interface {
 // @authorizationUrl https://example.com/oauth/authorize
 // @scope.admin Grants read and write access to administrative information
 //
-// NewCommandBuilder creates a new instance of the ServerCommandBuilder interface.
-func NewCommandBuilder(config config.Configuration, builder router.Builder) ServerCommandBuilder {
-	return &serverCommandBuilder{
+// NewServeCommandBuilder creates a new instance of the ServerCommandBuilder interface.
+func NewServeCommandBuilder(config config.Configuration, builder router.Builder) ServeCommandBuilder {
+	return &serveCommandBuilder{
 		cfg:     config,
 		builder: builder,
 	}
 }
 
-type serverCommandBuilder struct {
+type serveCommandBuilder struct {
 	cfg     config.Configuration
 	builder router.Builder
 }
 
-func (s serverCommandBuilder) New() *cobra.Command {
+func (s serveCommandBuilder) New() *cobra.Command {
 	return &cobra.Command{
 		Use:   "server",
 		Short: "Runs the application as a server",
@@ -82,29 +85,68 @@ func (s serverCommandBuilder) New() *cobra.Command {
 	}
 }
 
-func (s serverCommandBuilder) executeServer(cmd *cobra.Command, args []string) error {
+func (s *serveCommandBuilder) configureHealthCheck() error {
+	check := ServeLivelinessCheck()
+
+	center := info.GetHealthCenter()
+	err := center.RegisterLivelinessCheck(
+		check,
+		30*time.Second,
+		5*time.Second,
+		false,
+	)
+
+	return err
+}
+
+func (s *serveCommandBuilder) createRouter() (*chi.Mux, error) {
 	router := s.builder.New()
 
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
-		log.Printf("%s %s\n", method, route)
+		observability.LogInfoWithFields(log.Fields{
+			"method": method,
+			"route":  route},
+			"Request received")
 		return nil
 	}
 
 	if err := chi.Walk(router, walkFunc); err != nil {
-		log.Panicf("Logging error: %s\n", err.Error())
+		observability.LogPanicWithFields(log.Fields{
+			"error": err.Error()},
+			"An error occurred")
+		return nil, err
+	}
+	return router, nil
+}
+
+func (s serveCommandBuilder) executeServer(cmd *cobra.Command, args []string) error {
+	router, err := s.createRouter()
+	if err != nil {
+		observability.LogFatal(err)
 		return err
 	}
 
-	port := s.cfg.GetInt("service.port")
-	hostAddress := fmt.Sprintf(":%d", port)
-	log.Debug(
-		fmt.Sprintf(
-			"Starting server on %s",
-			hostAddress))
+	err = s.configureHealthCheck()
+	if err != nil {
+		observability.LogFatal(err)
+		return err
+	}
+
+	host, port := s.getHostConnectionDetails()
+	observability.LogDebugWithFields(log.Fields{
+		"host": host,
+		"port": port},
+		"Starting server")
+	hostAddress := fmt.Sprintf("%s:%d", host, port)
 	if err := http.ListenAndServe(hostAddress, router); err != nil {
-		log.Fatal(err)
+		observability.LogFatal(err)
 		return err
 	}
 
 	return nil
+}
+
+func (s *serveCommandBuilder) getHostConnectionDetails() (string, int) {
+	port := s.cfg.GetInt("service.port")
+	return "", port
 }

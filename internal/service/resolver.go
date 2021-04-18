@@ -6,7 +6,7 @@ import (
 	"github.com/calvinverse/service.provisioning.ui.web/internal/cmd"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/doc"
-	"github.com/calvinverse/service.provisioning.ui.web/internal/health"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/info"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/web"
 )
@@ -31,7 +31,7 @@ type resolver struct {
 
 func (r *resolver) resolveAPIRouters() []router.APIRouter {
 	docRouter := doc.NewDocumentationRouter(r.cfg)
-	healthRouter := health.NewHealthAPIRouter()
+	healthRouter := info.NewSelfAPIRouter()
 	return []router.APIRouter{
 		docRouter,
 		healthRouter,
@@ -40,7 +40,7 @@ func (r *resolver) resolveAPIRouters() []router.APIRouter {
 
 func (r *resolver) ResolveCommands() []*cobra.Command {
 	routerBuilder := r.resolveRouterBuilder()
-	serverCommandBuilder := cmd.NewCommandBuilder(r.cfg, routerBuilder)
+	serverCommandBuilder := cmd.NewServeCommandBuilder(r.cfg, routerBuilder)
 	if r.commands == nil {
 		r.commands = []*cobra.Command{
 			serverCommandBuilder.New(),

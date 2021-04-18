@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/calvinverse/service.provisioning.ui.web/internal/observability"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
@@ -50,7 +51,7 @@ func (c *concreteConfig) IsSet(key string) bool {
 
 // LoadConfiguration loads the configuration for the application from different configuration sources
 func (c *concreteConfig) LoadConfiguration(cfgFile string) error {
-	log.Debug("Reading configuration ...")
+	observability.LogDebug("Reading configuration ...")
 
 	// From the environment
 	c.cfg.SetEnvPrefix("PROVISION")
@@ -58,26 +59,26 @@ func (c *concreteConfig) LoadConfiguration(cfgFile string) error {
 	c.cfg.AutomaticEnv()
 
 	if cfgFile != "" {
-		log.Debug(
-			fmt.Sprintf(
-				"Reading configuration from: %s",
-				cfgFile))
+		observability.LogDebugWithFields(
+			log.Fields{
+				"configFile": cfgFile},
+			"Reading configuration from file")
 
 		c.cfg.SetConfigFile(cfgFile)
 	}
 
 	if err := c.cfg.ReadInConfig(); err != nil {
-		log.Fatal(
-			fmt.Sprintf(
-				"Configuration invalid. Error was %v",
-				err))
+		observability.LogFatalWithFields(
+			log.Fields{
+				"error": err},
+			"Configuration invalid")
 		return err
 	}
 
 	// Only use consul if we have a host+port and consul key specified
 	if c.cfg.IsSet("consul.enabled") && c.cfg.GetBool("consul.enabled") {
 		if err := c.loadFromConsul(); err != nil {
-
+			return err
 		}
 	}
 
@@ -91,32 +92,32 @@ func (c *concreteConfig) loadFromConsul() error {
 	consulHost := c.GetString("consul.host")
 	consulPort := c.GetInt("consul.port")
 	consulKeyPath := c.GetString("consul.keyPath")
-	log.Debug(
-		fmt.Sprintf(
-			"Reading configuration from Consul on host %s:%d via key %s.",
-			consulHost,
-			consulPort,
-			consulKeyPath))
+	observability.LogDebugWithFields(
+		log.Fields{
+			"consul_host":     consulHost,
+			"consul_port":     consulPort,
+			"consul_key_path": consulKeyPath},
+		"Reading configuration from Consul")
 
 	if err := c.cfg.AddRemoteProvider("consul", fmt.Sprintf("%s:%d", consulHost, consulPort), consulKeyPath); err != nil {
-		log.Fatal(
-			fmt.Sprintf(
-				"Unable to connect to Consul at host %s:%d to read key %s. Error was %v",
-				consulHost,
-				consulPort,
-				consulKeyPath,
-				err))
+		observability.LogFatalWithFields(
+			log.Fields{
+				"consul_host":     consulHost,
+				"consul_port":     consulPort,
+				"consul_key_path": consulKeyPath,
+				"error":           err},
+			"Unable to connect to Consul")
 		return err
 	}
 
 	if err := c.cfg.ReadRemoteConfig(); err != nil {
-		log.Warn(
-			fmt.Sprintf(
-				"Unable to read the configuration from Consul at key %s via host %s:%d at the moment. Error was %v",
-				consulKeyPath,
-				consulHost,
-				consulPort,
-				err))
+		observability.LogWarnWithFields(
+			log.Fields{
+				"consul_host":     consulHost,
+				"consul_port":     consulPort,
+				"consul_key_path": consulKeyPath,
+				"error":           err},
+			"Unable to read the configuration from Consul at the moment. Will continue to try.")
 
 		// Don't return the error here because the inability to read from consul might be because the Consul
 		// instance is currently not reachable. So we will continue to try.
@@ -127,11 +128,17 @@ func (c *concreteConfig) loadFromConsul() error {
 			time.Sleep(time.Second * 5) // delay after each request
 
 			if err := c.cfg.WatchRemoteConfig(); err != nil {
-				log.Errorf("unable to read remote config: %v", err)
+				observability.LogWarnWithFields(
+					log.Fields{
+						"consul_host":     consulHost,
+						"consul_port":     consulPort,
+						"consul_key_path": consulKeyPath,
+						"error":           err},
+					"unable to read remote config")
 				continue
 			}
 
-			fmt.Println("rereading remote config!")
+			observability.LogDebug("rereading remote config!")
 			c.cfg.ReadRemoteConfig()
 		}
 	}()

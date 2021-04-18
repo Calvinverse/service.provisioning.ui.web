@@ -5,16 +5,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/calvinverse/service.provisioning.ui.web/internal/observability"
 	"github.com/go-chi/chi/middleware"
 	"github.com/sirupsen/logrus"
 )
 
 type structuredLogger struct {
-	Logger *logrus.Logger
 }
 
 func (l *structuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
-	entry := &structuredLoggerEntry{Logger: logrus.NewEntry(l.Logger)}
+	entry := &structuredLoggerEntry{Logger: observability.NewLogger()}
 	logFields := logrus.Fields{}
 
 	logFields["ts"] = time.Now().UTC().Format(time.RFC1123)
