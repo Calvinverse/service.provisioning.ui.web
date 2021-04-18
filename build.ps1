@@ -106,7 +106,7 @@ function New-Container
     $command += " --build-arg NOW=$date"
     $command += " --build-arg REVISION=$sha1"
     $command += " --build-arg VERSION=$version"
-    $command += " --file ./build/package/server/dockerfile"
+    $command += " --file ./build/package/bff/dockerfile"
 
     if ($dockerTags.Length -gt 0)
     {
@@ -149,7 +149,7 @@ function New-LocalBuild
 
     Copy-Item -Path (Join-Path $PSScriptRoot "configs" "*") -Destination $absoluteOutputDir -Force
 
-    & swag init --parseInternal --output ./api --generalInfo ./internal/cmd/server.go
+    & swag init --parseInternal --output ./api --generalInfo ./internal/cmd/serve.go
 
     $docDirectory = Join-Path $absoluteOutputDir 'api'
     if (-not (Test-Path $docDirectory))
