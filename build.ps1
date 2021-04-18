@@ -169,7 +169,7 @@ function New-LocalBuild
     Add-Content -Path $configPath -Value 'ui:'
     Add-Content -Path $configPath -Value "  path: $clientDirectory"
 
-    go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/info.applicationName=provisioning-bff -X github.com/calvinverse/service.provisioning.ui.web/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning.ui.web/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning.ui.web/internal/info.version=$version" -o $outputDir/bff.exe ./cmd
+    go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/meta.applicationName=provisioning-bff -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.sha1=$sha1 -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.buildTime=$date -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.version=$version" -o $outputDir/bff.exe ./cmd
 
     go test -cover ./... ./cmd
 }

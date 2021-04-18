@@ -3,7 +3,7 @@ package observability
 import (
 	"os"
 
-	"github.com/calvinverse/service.provisioning.ui.web/internal/info"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/meta"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,8 +21,8 @@ func getCustomLoggerWithDefaultFields(logger *log.Logger) *log.Entry {
 func getDefaultLoggerFields() log.Fields {
 	logFields := log.Fields{}
 
-	logFields["application_name"] = info.ApplicationName()
-	logFields["application_version"] = info.Version()
+	logFields["application_name"] = meta.ApplicationName()
+	logFields["application_version"] = meta.Version()
 
 	return logFields
 }
@@ -111,7 +111,7 @@ func NewLogger() *log.Entry {
 
 	logger.Level = log.DebugLevel
 
-	getCustomLoggerWithDefaultFields(logger)
+	return getCustomLoggerWithDefaultFields(logger)
 }
 
 // SetLogLevel sets the minimum level of log messages that should be recorded

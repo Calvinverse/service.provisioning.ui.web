@@ -1,4 +1,4 @@
-package info
+package meta
 
 var (
 	applicationName string
