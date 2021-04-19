@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	defaultLogger *log.Entry
+	defaultLogger *log.Entry = getStandardLoggerWithDefaultFields()
 )
 
 func getCustomLoggerWithDefaultFields(logger *log.Logger) *log.Entry {
@@ -38,8 +38,6 @@ func InitializeLogger() {
 	log.SetOutput(os.Stdout)
 
 	log.SetLevel(log.DebugLevel)
-
-	defaultLogger = getStandardLoggerWithDefaultFields()
 }
 
 // LogDebug logs a debug message with the given arguments
