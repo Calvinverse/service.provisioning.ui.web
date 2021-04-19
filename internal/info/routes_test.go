@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/calvinverse/service.provisioning.ui.web/internal/meta"
 	"github.com/go-chi/chi"
 )
 
@@ -583,16 +584,16 @@ func validateInfoWithAcceptHeader(t *testing.T, w *httptest.ResponseRecorder, de
 			http.StatusOK)
 	}
 
-	if actualResult.BuildTime != BuildTime() {
-		t.Errorf("Handler returned unexpected build time: got %s wanted %s", actualResult.BuildTime, BuildTime())
+	if actualResult.BuildTime != meta.BuildTime() {
+		t.Errorf("Handler returned unexpected build time: got %s wanted %s", actualResult.BuildTime, meta.BuildTime())
 	}
 
-	if actualResult.Revision != Revision() {
-		t.Errorf("Handler returned unexpected revision: got %s wanted %s", actualResult.Revision, Revision())
+	if actualResult.Revision != meta.Revision() {
+		t.Errorf("Handler returned unexpected revision: got %s wanted %s", actualResult.Revision, meta.Revision())
 	}
 
-	if actualResult.Version != Version() {
-		t.Errorf("Handler returned unexpected build time: got %s wanted %s", actualResult.Version, Version())
+	if actualResult.Version != meta.Version() {
+		t.Errorf("Handler returned unexpected build time: got %s wanted %s", actualResult.Version, meta.Version())
 	}
 }
 

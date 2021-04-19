@@ -2,24 +2,83 @@ basePath: /api
 definitions:
   environment.Environment:
     type: object
-  health.InfoResponse:
+  info.detailedCheckInformation:
     properties:
-      buildtime:
+      description:
+        description: Description returns the description of the health check status.
         type: string
-      revision:
+      name:
+        description: Name returns the name of the health check.
         type: string
-      version:
+      status:
+        description: Status returns the status of the health check, either success
+          or failure.
+        type: string
+      timestamp:
+        description: Timestamp returns the time the healtcheck was executed.
         type: string
     type: object
-  health.PingResponse:
+  info.infoResponse:
     properties:
       buildtime:
-        type: string
-      response:
+        description: BuildTime stores the date and time the application was built.
         type: string
       revision:
+        description: Revision stores the GIT SHA of the commit on which the application
+          build was based.
         type: string
       version:
+        description: Version stores the version number of the application.
+        type: string
+    type: object
+  info.livelinessDetailedResponse:
+    properties:
+      checks:
+        description: Status of all the health checks
+        items:
+          $ref: '#/definitions/info.detailedCheckInformation'
+        type: array
+      status:
+        description: Global status
+        type: string
+      time:
+        description: Timestamp the liveliness response was created at
+        type: string
+    type: object
+  info.pingResponse:
+    properties:
+      response:
+        type: string
+    type: object
+  info.readinessResponse:
+    properties:
+      checks:
+        description: Status of all health checks
+        items:
+          $ref: '#/definitions/info.summaryCheckInformation'
+        type: array
+      status:
+        description: Status returns the status of the readiness check, either success
+          or failure.
+        type: string
+      time:
+        description: Timestamp returns the timestamp at which the last readiness check
+          was executed.
+        type: string
+    type: object
+  info.startedResponse:
+    properties:
+      time:
+        type: string
+    type: object
+  info.summaryCheckInformation:
+    properties:
+      name:
+        description: Name returns the name of the health check.
+        type: string
+      status:
+        description: Status returns the status of the health check, either success
+          or failure.
         type: string
     type: object
 host: localhost:8080
@@ -28,7 +87,8 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: Provides information about deployed environments and the templates used to created these environments.
+  description: Provides information about deployed environments and the templates
+    used to created these environments.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -167,30 +227,108 @@ paths:
     get:
       consumes:
       - application/json
+      - text/xml
       description: Respond to an info request with information about the application.
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/health.InfoResponse'
+            $ref: '#/definitions/info.infoResponse'
+        "415":
+          description: Unsupported media type
+          schema:
+            type: string
       summary: Respond to an info request
+      tags:
+      - health
+  /v1/self/liveliness:
+    get:
+      consumes:
+      - application/json
+      - text/xml
+      description: Respond to an liveliness request with information about the status
+        of the latest health checks.
+      parameters:
+      - description: options are summary or detailed
+        enum:
+        - summary
+        - detailed
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      - text/xml
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/info.livelinessDetailedResponse'
+        "415":
+          description: Unsupported media type
+          schema:
+            type: string
+      summary: Respond to an liveliness request
       tags:
       - health
   /v1/self/ping:
     get:
       consumes:
       - application/json
-      description: Respond to a ping request with information about the application.
+      - text/xml
+      description: Respond to a ping request with a pong response.
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/health.PingResponse'
+            $ref: '#/definitions/info.pingResponse'
+        "415":
+          description: Unsupported media type
+          schema:
+            type: string
       summary: Respond to a ping request
+      tags:
+      - health
+  /v1/self/readiness:
+    get:
+      consumes:
+      - application/json
+      - text/xml
+      description: Respond to an readiness request with information about ability
+        of the application to start serving requests.
+      produces:
+      - application/json
+      - text/xml
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/info.readinessResponse'
+      summary: Respond to an readiness request
+      tags:
+      - health
+  /v1/self/started:
+    get:
+      consumes:
+      - application/json
+      - text/xml
+      description: Respond to an started request with information indicating if the
+        application has started successfully.
+      produces:
+      - application/json
+      - text/xml
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/info.startedResponse'
+      summary: Respond to an started request
       tags:
       - health
 securityDefinitions:

@@ -230,10 +230,12 @@ var doc = `{
             "get": {
                 "description": "Respond to an info request with information about the application.",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "text/xml"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/xml"
                 ],
                 "tags": [
                     "health"
@@ -243,7 +245,56 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/health.InfoResponse"
+                            "$ref": "#/definitions/info.infoResponse"
+                        }
+                    },
+                    "415": {
+                        "description": "Unsupported media type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/self/liveliness": {
+            "get": {
+                "description": "Respond to an liveliness request with information about the status of the latest health checks.",
+                "consumes": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Respond to an liveliness request",
+                "parameters": [
+                    {
+                        "enum": [
+                            "summary",
+                            "detailed"
+                        ],
+                        "type": "string",
+                        "description": "options are summary or detailed",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/info.livelinessDetailedResponse"
+                        }
+                    },
+                    "415": {
+                        "description": "Unsupported media type",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -251,12 +302,14 @@ var doc = `{
         },
         "/v1/self/ping": {
             "get": {
-                "description": "Respond to a ping request with information about the application.",
+                "description": "Respond to a ping request with a pong response.",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "text/xml"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/xml"
                 ],
                 "tags": [
                     "health"
@@ -266,7 +319,63 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/health.PingResponse"
+                            "$ref": "#/definitions/info.pingResponse"
+                        }
+                    },
+                    "415": {
+                        "description": "Unsupported media type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/self/readiness": {
+            "get": {
+                "description": "Respond to an readiness request with information about ability of the application to start serving requests.",
+                "consumes": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Respond to an readiness request",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/info.readinessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/self/started": {
+            "get": {
+                "description": "Respond to an started request with information indicating if the application has started successfully.",
+                "consumes": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Respond to an started request",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/info.startedResponse"
                         }
                     }
                 }
@@ -277,33 +386,109 @@ var doc = `{
         "environment.Environment": {
             "type": "object"
         },
-        "health.InfoResponse": {
+        "info.detailedCheckInformation": {
             "type": "object",
             "properties": {
-                "buildtime": {
+                "description": {
+                    "description": "Description returns the description of the health check status.",
                     "type": "string"
                 },
-                "revision": {
+                "name": {
+                    "description": "Name returns the name of the health check.",
                     "type": "string"
                 },
-                "version": {
+                "status": {
+                    "description": "Status returns the status of the health check, either success or failure.",
+                    "type": "string"
+                },
+                "timestamp": {
+                    "description": "Timestamp returns the time the healtcheck was executed.",
                     "type": "string"
                 }
             }
         },
-        "health.PingResponse": {
+        "info.infoResponse": {
             "type": "object",
             "properties": {
                 "buildtime": {
-                    "type": "string"
-                },
-                "response": {
+                    "description": "BuildTime stores the date and time the application was built.",
                     "type": "string"
                 },
                 "revision": {
+                    "description": "Revision stores the GIT SHA of the commit on which the application build was based.",
                     "type": "string"
                 },
                 "version": {
+                    "description": "Version stores the version number of the application.",
+                    "type": "string"
+                }
+            }
+        },
+        "info.livelinessDetailedResponse": {
+            "type": "object",
+            "properties": {
+                "checks": {
+                    "description": "Status of all the health checks",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/info.detailedCheckInformation"
+                    }
+                },
+                "status": {
+                    "description": "Global status",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "Timestamp the liveliness response was created at",
+                    "type": "string"
+                }
+            }
+        },
+        "info.pingResponse": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "string"
+                }
+            }
+        },
+        "info.readinessResponse": {
+            "type": "object",
+            "properties": {
+                "checks": {
+                    "description": "Status of all health checks",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/info.summaryCheckInformation"
+                    }
+                },
+                "status": {
+                    "description": "Status returns the status of the readiness check, either success or failure.",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "Timestamp returns the timestamp at which the last readiness check was executed.",
+                    "type": "string"
+                }
+            }
+        },
+        "info.startedResponse": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
+        "info.summaryCheckInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name returns the name of the health check.",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status returns the status of the health check, either success or failure.",
                     "type": "string"
                 }
             }

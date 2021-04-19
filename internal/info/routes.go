@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/calvinverse/service.provisioning.ui.web/internal/meta"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/observability"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
 	"github.com/go-chi/chi"
@@ -138,9 +139,9 @@ func (h *selfRouter) Version() int8 {
 // @Router /v1/self/info [get]
 func (h *selfRouter) info(w http.ResponseWriter, r *http.Request) {
 	response := infoResponse{
-		BuildTime: BuildTime(),
-		Revision:  Revision(),
-		Version:   Version(),
+		BuildTime: meta.BuildTime(),
+		Revision:  meta.Revision(),
+		Version:   meta.Version(),
 	}
 
 	h.responseBody(w, r, http.StatusOK, response)

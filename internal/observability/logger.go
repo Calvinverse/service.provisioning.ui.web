@@ -44,62 +44,62 @@ func InitializeLogger() {
 
 // LogDebug logs a debug message with the given arguments
 func LogDebug(args ...interface{}) {
-	defaultLogger.Debug(args)
+	defaultLogger.Debug(args...)
 }
 
 // LogDebugWithFields logs a debug message with the given arguments and the given fields
 func LogDebugWithFields(fields log.Fields, args ...interface{}) {
-	defaultLogger.WithFields(fields).Debug(args)
+	defaultLogger.WithFields(fields).Debug(args...)
 }
 
 // LogError logs an error message with the given arguments
 func LogError(args ...interface{}) {
-	defaultLogger.Error(args)
+	defaultLogger.Error(args...)
 }
 
 // LogError logs an error message with the arguments and the provided fields
 func LogErrorWithFields(fields log.Fields, args ...interface{}) {
-	defaultLogger.WithFields(fields).Error(args)
+	defaultLogger.WithFields(fields).Error(args...)
 }
 
 // LogFatal logs a fatal message with the given arguments
 func LogFatal(args ...interface{}) {
-	defaultLogger.Fatal(args)
+	defaultLogger.Fatal(args...)
 }
 
 // LogFatal logs a fatal message with the arguments and the provided fields
 func LogFatalWithFields(fields log.Fields, args ...interface{}) {
-	defaultLogger.WithFields(fields).Fatal(args)
+	defaultLogger.WithFields(fields).Fatal(args...)
 }
 
 // LogInfo logs an info message with the given arguments
 func LogInfo(args ...interface{}) {
-	defaultLogger.Info(args)
+	defaultLogger.Info(args...)
 }
 
 // LogInfo logs an info message with the arguments and the provided fields
 func LogInfoWithFields(fields log.Fields, args ...interface{}) {
-	defaultLogger.WithFields(fields).Info(args)
+	defaultLogger.WithFields(fields).Info(args...)
 }
 
 // LogPanic logs a panic message with the given arguments
 func LogPanic(args ...interface{}) {
-	defaultLogger.Panic(args)
+	defaultLogger.Panic(args...)
 }
 
 // LogPanicWithFields logs a panic message with the arguments and the provided fields
 func LogPanicWithFields(fields log.Fields, args ...interface{}) {
-	defaultLogger.WithFields(fields).Panic(args)
+	defaultLogger.WithFields(fields).Panic(args...)
 }
 
 // LogWarn logs a warning message with the provided arguments
 func LogWarn(args ...interface{}) {
-	defaultLogger.Warn(args)
+	defaultLogger.Warn(args...)
 }
 
 // LogWarnWithFields logs a warning message with the arguments and the provided fields
 func LogWarnWithFields(fields log.Fields, args ...interface{}) {
-	defaultLogger.WithFields(fields).Warn(args)
+	defaultLogger.WithFields(fields).Warn(args...)
 }
 
 func NewLogger() *log.Entry {

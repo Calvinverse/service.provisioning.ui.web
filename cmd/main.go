@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
-	"github.com/calvinverse/service.provisioning.ui.web/internal/info"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/meta"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/observability"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/service"
 )
@@ -18,7 +18,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:     "server",
-		Version: info.Version(),
+		Version: meta.Version(),
 	}
 )
 
