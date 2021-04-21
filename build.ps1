@@ -106,7 +106,7 @@ function New-Container
     $command += " --build-arg NOW=$date"
     $command += " --build-arg REVISION=$sha1"
     $command += " --build-arg VERSION=$version"
-    $command += " --file ./build/package/server/dockerfile"
+    $command += " --file ./build/package/bff/dockerfile"
 
     if ($dockerTags.Length -gt 0)
     {
@@ -149,7 +149,7 @@ function New-LocalBuild
 
     Copy-Item -Path (Join-Path $PSScriptRoot "configs" "*") -Destination $absoluteOutputDir -Force
 
-    & swag init --parseInternal --output ./api --generalInfo ./internal/cmd/server.go
+    & swag init --parseInternal --output ./api --generalInfo ./internal/cmd/serve.go
 
     $docDirectory = Join-Path $absoluteOutputDir 'api'
     if (-not (Test-Path $docDirectory))
@@ -169,7 +169,7 @@ function New-LocalBuild
     Add-Content -Path $configPath -Value 'ui:'
     Add-Content -Path $configPath -Value "  path: $clientDirectory"
 
-    go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/info.sha1=$sha1 -X github.com/calvinverse/service.provisioning.ui.web/internal/info.buildTime=$date -X github.com/calvinverse/service.provisioning.ui.web/internal/info.version=$version" -o $outputDir/server.exe ./cmd
+    go build -a -installsuffix cgo -v -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/meta.applicationName=provisioning-bff -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.sha1=$sha1 -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.buildTime=$date -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.version=$version" -o $outputDir/bff.exe ./cmd
 
     go test -cover ./... ./cmd
 }

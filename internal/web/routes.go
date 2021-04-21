@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/calvinverse/service.provisioning.ui.web/internal/config"
+	"github.com/calvinverse/service.provisioning.ui.web/internal/observability"
 	"github.com/calvinverse/service.provisioning.ui.web/internal/router"
 	"github.com/go-chi/chi"
 )
@@ -41,20 +42,20 @@ func (w *webRouter) Routes(r *chi.Mux, rootRouter func() chi.Router) {
 	} else {
 		ex, err := os.Executable()
 		if err != nil {
-			log.Fatal(
-				fmt.Sprintf(
-					"Failed to locate the directory of the executable. Error was: %v",
-					err))
+			observability.LogFatalWithFields(
+				log.Fields{
+					"error": err},
+				"Failed to locate the directory of the executable")
 		}
 
 		workDir := filepath.Dir(ex)
 		filesDir = filepath.Join(workDir, "client")
 	}
 
-	log.Debug(
-		fmt.Sprintf(
-			"Using UI directory %s",
-			filesDir))
+	observability.LogDebugWithFields(
+		log.Fields{
+			"directory": filesDir},
+		"UI directory")
 
 	// Load the index.html
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {

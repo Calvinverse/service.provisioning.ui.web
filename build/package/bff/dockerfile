@@ -20,7 +20,7 @@ COPY cmd/ ./cmd
 RUN go mod download
 
 RUN go get github.com/swaggo/swag/cmd/swag && \
-  swag init --parseInternal --output ./api --generalInfo ./internal/cmd/server.go
+  swag init --parseInternal --output ./api --generalInfo ./internal/cmd/serve.go
 
 RUN CGO_ENABLED=0\
   GOOS=linux\
@@ -28,8 +28,8 @@ RUN CGO_ENABLED=0\
   -a\
   -installsuffix cgo\
   -v\
-  -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/info.sha1=${REVISION} -X github.com/calvinverse/service.provisioning.ui.web/internal/info.buildTime=${NOW} -X github.com/calvinverse/service.provisioning.ui.web/internal/info.version=${VERSION}"\
-  -o server\
+  -ldflags="-X github.com/calvinverse/service.provisioning.ui.web/internal/meta.applicationName=provisioning-bff -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.sha1=${REVISION} -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.buildTime=${NOW} -X github.com/calvinverse/service.provisioning.ui.web/internal/meta.version=${VERSION}"\
+  -o bff\
   ./cmd
 
 # Run tests
@@ -95,10 +95,10 @@ RUN mkdir -p /etc/provisioning.bff && chown -R provisioning:provisioning /etc/pr
   mkdir -p /etc/provisioning.bff/conf.d && chown -R provisioning:provisioning /etc/provisioning.bff/conf.d && \
   mkdir -p /etc/provisioning.bff/doc && chown -R provisioning:provisioning /etc/provisioning.bff/doc
 
-COPY --from=build-go /app/server /usr/bin
+COPY --from=build-go /app/bff /usr/bin
 
-# Run the server app as sanity check
-RUN /usr/bin/server
+# Run the webui app as sanity check
+RUN /usr/bin/bff
 
 COPY --from=build-go /app/configs/config.yaml /etc/provisioning.bff/conf.d
 
@@ -106,7 +106,7 @@ COPY --from=build-go /app/api/swagger.json /etc/provisioning.bff/doc
 
 COPY --from=build-node /web/dist/ ${ui_path}
 
-COPY ./build/package/server/server.sh /etc/service/provisioning.bff/run
+COPY ./build/package/bff/bff.sh /etc/service/provisioning.bff/run
 
 RUN dos2unix /etc/service/provisioning.bff/run && \
   chmod +x /etc/service/provisioning.bff/run

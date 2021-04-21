@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
-	"github.com/sirupsen/logrus"
 )
 
 // Builder is used to create a new Chi Mux with all the routes and configurations set.
@@ -42,12 +41,7 @@ func (rb routerBuilder) apiVersionCtx(version string) func(next http.Handler) ht
 }
 
 func (rb routerBuilder) New() *chi.Mux {
-	logger := logrus.New()
-	logger.Formatter = &logrus.JSONFormatter{
-		DisableTimestamp: true,
-	}
-
-	router := rb.newChiRouter(logger)
+	router := rb.newChiRouter()
 
 	// Based on this post and the comments: https://www.troyhunt.com/your-api-versioning-is-wrong-which-is/
 	// Use the api/v1 approach
@@ -70,12 +64,12 @@ func (rb routerBuilder) New() *chi.Mux {
 		}
 	})
 
-	rb.webRouter.Routes(router, func() chi.Router { return rb.newChiRouter(logger) })
+	rb.webRouter.Routes(router, func() chi.Router { return rb.newChiRouter() })
 
 	return router
 }
 
-func (rb routerBuilder) newChiRouter(logger *logrus.Logger) *chi.Mux {
+func (rb routerBuilder) newChiRouter() *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
 		render.SetContentType(render.ContentTypeJSON),
@@ -83,7 +77,7 @@ func (rb routerBuilder) newChiRouter(logger *logrus.Logger) *chi.Mux {
 		middleware.Recoverer,
 	)
 
-	router.Use(rb.newStructuredLogger(logger))
+	router.Use(rb.newStructuredLogger())
 
 	router.Use(render.SetContentType(render.ContentTypeJSON))
 
@@ -103,6 +97,6 @@ func (rb routerBuilder) newChiRouter(logger *logrus.Logger) *chi.Mux {
 	return router
 }
 
-func (rb routerBuilder) newStructuredLogger(l *logrus.Logger) func(next http.Handler) http.Handler {
-	return middleware.RequestLogger(&structuredLogger{l})
+func (rb routerBuilder) newStructuredLogger() func(next http.Handler) http.Handler {
+	return middleware.RequestLogger(&structuredLogger{})
 }
