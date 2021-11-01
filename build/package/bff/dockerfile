@@ -82,7 +82,7 @@ RUN cd /web && npm run lint && npm run build
 #
 
 # Should grab our base container
-FROM testcalvinverse.azurecr.io/base.container.linux:latest
+FROM alpine:latest
 
 ARG port=8080
 ARG ui_path=/etc/provisioning.bff/client
@@ -106,16 +106,20 @@ COPY --from=build-go /app/api/swagger.json /etc/provisioning.bff/doc
 
 COPY --from=build-node /web/dist/ ${ui_path}
 
-COPY ./build/package/bff/bff.sh /etc/service/provisioning.bff/run
+COPY ./build/package/bff/bff.sh /etc/provisioning.bff/bff.sh
 
-RUN dos2unix /etc/service/provisioning.bff/run && \
-  chmod +x /etc/service/provisioning.bff/run
+RUN dos2unix /etc/provisioning.bff/bff.sh && \
+  chmod +x /etc/provisioning.bff/bff.sh
 
-RUN ls -la /etc/service/provisioning.bff
+RUN ls -la /etc/provisioning.bff
 
 ENV PROVISION_SERVICE_PORT ${port}
 ENV PROVISION_UI_PATH ${ui_path}
 ENV PROVISION_CONFIG_PATH /etc/provisioning.bff/conf.d/config.yaml
 ENV PROVISION_DOC_PATH /etc/provisioning.bff/doc
+
+USER provisioning
+
+ENTRYPOINT [ "/etc/provisioning.bff/bff.sh" ]
 
 EXPOSE ${port}
